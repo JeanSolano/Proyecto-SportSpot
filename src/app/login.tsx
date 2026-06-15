@@ -173,20 +173,13 @@ export default function LoginScreen({ onGoRegister }: { onGoRegister?: () => voi
             <View style={[styles.dividerLine, { backgroundColor: theme.border }]} />
           </View>
 
-          <View style={styles.socialRow}>
-            <Pressable style={({ pressed }) => [
-              styles.socialBtn,
-              { backgroundColor: theme.background, borderColor: theme.border, opacity: pressed ? 0.7 : 1 },
-            ]}>
-              <Text style={[styles.socialText, { color: theme.text }]}>Google</Text>
-            </Pressable>
-            <Pressable style={({ pressed }) => [
-              styles.socialBtn,
-              { backgroundColor: theme.background, borderColor: theme.border, opacity: pressed ? 0.7 : 1 },
-            ]}>
-              <Text style={[styles.socialText, { color: theme.text }]}>Facebook</Text>
-            </Pressable>
-          </View>
+          <Pressable style={({ pressed }) => [
+            styles.googleBtn,
+            { backgroundColor: theme.background, borderColor: theme.border, opacity: pressed ? 0.7 : 1 },
+          ]}>
+            <Text style={styles.googleLogo}>G</Text>
+            <Text style={[styles.socialText, { color: theme.text }]}>Continuar con Google</Text>
+          </Pressable>
 
           <View style={styles.termsRow}>
             <Text style={[styles.termsText, { color: theme.textTertiary }]}>Al continuar, aceptas nuestros </Text>
@@ -256,8 +249,22 @@ const styles = StyleSheet.create({
   dividerRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
   dividerLine: { flex: 1, height: StyleSheet.hairlineWidth },
   dividerText: { ...Typography.caption },
-  socialRow: { flexDirection: 'row', gap: Spacing.three },
-  socialBtn: { flex: 1, height: 48, borderWidth: 1, borderRadius: BorderRadius.sm, alignItems: 'center', justifyContent: 'center' },
+  googleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 50,
+    borderWidth: 1,
+    borderRadius: BorderRadius.sm,
+    gap: Spacing.two,
+  },
+  googleLogo: {
+    fontSize: 18,
+    fontWeight: '700' as const,
+    color: '#4285F4',
+    width: 22,
+    textAlign: 'center',
+  },
   socialText: { ...Typography.bodyBold },
   termsRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', marginBottom: Spacing.two },
   termsText: { ...Typography.caption },

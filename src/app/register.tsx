@@ -7,6 +7,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -112,6 +113,12 @@ export default function RegisterScreen({ onGoLogin }: { onGoLogin?: () => void }
           start={Gradients.header.start}
           end={Gradients.header.end}
           style={[styles.gradientHeader, { paddingTop: insets.top + Spacing.three }]}>
+          <Pressable
+            onPress={onGoLogin}
+            style={[styles.backBtn, { top: insets.top + Spacing.two }]}
+            hitSlop={12}>
+            <Text style={styles.backBtnText}>← Volver</Text>
+          </Pressable>
           <View style={styles.logoWrapper}>
             <Image
               source={require('@/assets/images/logo-glow.png')}
@@ -243,6 +250,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingBottom: Spacing.five,
     gap: Spacing.two,
+  },
+  backBtn: {
+    position: 'absolute',
+    left: Spacing.three,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  backBtnText: {
+    color: 'rgba(255,255,255,0.92)',
+    ...Typography.bodyBold,
   },
   logoWrapper: {
     width: 120,

@@ -5,6 +5,7 @@ import { useColorScheme } from 'react-native';
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import AppTabs from '@/components/app-tabs';
 import BookingModal from '@/components/booking-modal';
+import VenueDetailModal from '@/components/venue-detail-modal';
 import { AuthProvider, useAuth } from '@/context/auth';
 import { BookingsProvider } from '@/context/bookings';
 import LoginScreen from './login';
@@ -31,6 +32,7 @@ function AppContent() {
       {isAuthenticated ? (
         <>
           <AppTabs />
+          <VenueDetailModal />
           <BookingModal />
         </>
       ) : (

@@ -93,13 +93,13 @@ export type Venue = (typeof VENUES)[number];
 
 function VenueCard({ venue }: { venue: Venue }) {
   const theme = useTheme();
-  const { openBooking } = useBookings();
-  const [liked, setLiked] = useState(false);
+  const { openBooking, openDetail, likedIds, toggleLike } = useBookings();
+  const liked = !!likedIds[venue.id];
 
   return (
     <View style={[styles.card, { backgroundColor: theme.surface }, Shadows.card]}>
-      {/* Hero image */}
-      <View style={styles.hero}>
+      {/* Hero image — tap to open venue detail */}
+      <Pressable onPress={() => openDetail(venue)} style={styles.hero}>
         <Image
           source={{ uri: venue.imageUrl }}
           style={StyleSheet.absoluteFill}
@@ -115,7 +115,7 @@ function VenueCard({ venue }: { venue: Venue }) {
           <Text style={styles.heroTitle}>{venue.title}</Text>
           <Text style={styles.heroDesc} numberOfLines={1}>{venue.description}</Text>
         </LinearGradient>
-      </View>
+      </Pressable>
 
       {/* Content */}
       <View style={styles.content}>
@@ -152,7 +152,7 @@ function VenueCard({ venue }: { venue: Venue }) {
 
         <View style={styles.actionsRow}>
           <View style={styles.stats}>
-            <Pressable onPress={() => setLiked(v => !v)} style={styles.statBtn}>
+            <Pressable onPress={() => toggleLike(venue.id)} style={styles.statBtn}>
               <Text style={[styles.statText, { color: liked ? '#E63946' : theme.textSecondary }]}>
                 {liked ? '♥' : '♡'} {venue.likes + (liked ? 1 : 0)}
               </Text>

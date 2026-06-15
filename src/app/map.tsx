@@ -151,10 +151,9 @@ const bg = StyleSheet.create({
 export default function MapScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const { openBooking } = useBookings();
+  const { openBooking, openDetail, likedIds, toggleLike } = useBookings();
   const [selected, setSelected] = useState<Venue | null>(null);
   const sheetAnim = useRef(new Animated.Value(SHEET_HEIGHT)).current;
-  const [liked, setLiked] = useState<Record<string, boolean>>({});
 
   const openSheet = (venue: Venue) => {
     setSelected(venue);
@@ -173,8 +172,6 @@ export default function MapScreen() {
       useNativeDriver: true,
     }).start(() => setSelected(null));
   };
-
-  const toggleLike = (id: string) => setLiked(prev => ({ ...prev, [id]: !prev[id] }));
 
   return (
     <View style={styles.screen}>
@@ -251,9 +248,11 @@ export default function MapScreen() {
                 <Text style={[styles.sheetTitle, { color: theme.text }]} numberOfLines={2}>
                   {selected.title}
                 </Text>
-                <Text style={[styles.sheetVenue, { color: theme.textSecondary }]} numberOfLines={1}>
-                  {selected.venueName}
-                </Text>
+                <Pressable onPress={() => { closeSheet(); setTimeout(() => openDetail(selected), 200); }}>
+                  <Text style={[styles.sheetVenue, { color: theme.primary }]} numberOfLines={1}>
+                    {selected.venueName} ›
+                  </Text>
+                </Pressable>
                 <View style={styles.sheetRatingRow}>
                   <Text style={styles.star}>★</Text>
                   <Text style={[styles.sheetRating, { color: theme.textSecondary }]}>
@@ -283,9 +282,9 @@ export default function MapScreen() {
               <Pressable onPress={() => toggleLike(selected.id)} style={styles.likeBtn}>
                 <Text style={[
                   styles.likeBtnText,
-                  { color: liked[selected.id] ? '#E63946' : theme.textSecondary },
+                  { color: likedIds[selected.id] ? '#E63946' : theme.textSecondary },
                 ]}>
-                  {liked[selected.id] ? '♥' : '♡'} {selected.likes + (liked[selected.id] ? 1 : 0)}
+                  {likedIds[selected.id] ? '♥' : '♡'} {selected.likes + (likedIds[selected.id] ? 1 : 0)}
                 </Text>
               </Pressable>
 

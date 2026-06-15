@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, type ReactNode } from 'react';
 import type { Venue } from '@/app/index';
 
 export interface Booking {
@@ -21,12 +21,21 @@ export interface Booking {
 }
 
 interface BookingsContextType {
+  // Reservas
   bookings: Booking[];
-  bookingVenue: Venue | null;
   addBooking: (data: Omit<Booking, 'id' | 'createdAt' | 'status'>) => void;
   cancelBooking: (id: string) => void;
+  // Flujo de reserva (modal)
+  bookingVenue: Venue | null;
   openBooking: (venue: Venue) => void;
   closeBooking: () => void;
+  // Detalle de venue (modal)
+  detailVenue: Venue | null;
+  openDetail: (venue: Venue) => void;
+  closeDetail: () => void;
+  // Likes globales
+  likedIds: Record<string, boolean>;
+  toggleLike: (venueId: string) => void;
 }
 
 const BookingsContext = createContext<BookingsContextType | null>(null);
@@ -34,6 +43,8 @@ const BookingsContext = createContext<BookingsContextType | null>(null);
 export function BookingsProvider({ children }: { children: ReactNode }) {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [bookingVenue, setBookingVenue] = useState<Venue | null>(null);
+  const [detailVenue, setDetailVenue] = useState<Venue | null>(null);
+  const [likedIds, setLikedIds] = useState<Record<string, boolean>>({});
 
   const addBooking = (data: Omit<Booking, 'id' | 'createdAt' | 'status'>) => {
     setBookings(prev => [{
@@ -47,14 +58,22 @@ export function BookingsProvider({ children }: { children: ReactNode }) {
   const cancelBooking = (id: string) =>
     setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'cancelled' } : b));
 
+  const toggleLike = (venueId: string) =>
+    setLikedIds(prev => ({ ...prev, [venueId]: !prev[venueId] }));
+
   return (
     <BookingsContext.Provider value={{
       bookings,
-      bookingVenue,
       addBooking,
       cancelBooking,
+      bookingVenue,
       openBooking: setBookingVenue,
       closeBooking: () => setBookingVenue(null),
+      detailVenue,
+      openDetail: setDetailVenue,
+      closeDetail: () => setDetailVenue(null),
+      likedIds,
+      toggleLike,
     }}>
       {children}
     </BookingsContext.Provider>
