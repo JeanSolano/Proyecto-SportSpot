@@ -8,6 +8,7 @@ import { useAuth } from '@/context/auth';
 import { type Booking, useBookings } from '@/context/bookings';
 import { BorderRadius, Gradients, Shadows, Spacing, Typography } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import EstablishmentDashboard from '@/components/establishment-dashboard';
 
 const STATS = [
   {
@@ -82,6 +83,7 @@ export default function ProfileScreen() {
   const { logout } = useAuth();
   const { bookings, cancelBooking } = useBookings();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [showDashboard, setShowDashboard] = useState(false);
 
   function handleCancel(id: string) {
     Alert.alert(
@@ -95,6 +97,7 @@ export default function ProfileScreen() {
   }
 
   return (
+    <>
     <ScrollView
       style={[styles.scroll, { backgroundColor: theme.background }]}
       showsVerticalScrollIndicator={false}>
@@ -172,6 +175,25 @@ export default function ProfileScreen() {
         )}
       </View>
 
+      {/* Establishment dashboard entry */}
+      <View style={styles.section}>
+        <TouchableOpacity
+          onPress={() => setShowDashboard(true)}
+          activeOpacity={0.7}
+          style={[styles.dashboardBtn, { backgroundColor: theme.surface }, Shadows.card]}>
+          <View style={[styles.dashboardIconWrap, { backgroundColor: '#E8F5E9' }]}>
+            <Text style={styles.dashboardIcon}>🏟️</Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.dashboardTitle, { color: theme.text }]}>Panel de Establecimiento</Text>
+            <Text style={[styles.dashboardSub, { color: theme.textSecondary }]}>
+              Vista de propietario · Demo
+            </Text>
+          </View>
+          <Text style={[styles.chevron, { color: theme.textTertiary }]}>›</Text>
+        </TouchableOpacity>
+      </View>
+
       {/* Account settings */}
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: theme.text }]}>Cuenta</Text>
@@ -240,6 +262,12 @@ export default function ProfileScreen() {
 
       <View style={{ height: insets.bottom + Spacing.six }} />
     </ScrollView>
+
+    <EstablishmentDashboard
+      visible={showDashboard}
+      onClose={() => setShowDashboard(false)}
+    />
+    </>
   );
 }
 
@@ -347,6 +375,23 @@ const styles = StyleSheet.create({
     marginTop: Spacing.two,
   },
   logoutText: { ...Typography.bodyBold },
+  dashboardBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: BorderRadius.md,
+    padding: Spacing.three,
+    gap: Spacing.two,
+  },
+  dashboardIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: BorderRadius.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dashboardIcon: { fontSize: 22 },
+  dashboardTitle: { ...Typography.bodyBold },
+  dashboardSub: { ...Typography.caption, marginTop: 1 },
 });
 
 // ─── Booking card styles ──────────────────────────────────────────────────────
