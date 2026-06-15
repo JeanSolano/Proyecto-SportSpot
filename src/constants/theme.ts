@@ -7,62 +7,67 @@ import '@/global.css';
 
 import { Platform } from 'react-native';
 
+// Brand colors extracted from the official SportSpot logo
+// Pin: green (#56B330) → orange-red (#F4511E) → blue (#1E7FE0)
+// Text: "Sport" #3B5CC4 · "Spot" navy #1B2880
 export const Colors = {
   light: {
-    // Primary brand colors
-    primary: '#00CA4E',        // Verde brillante (principal)
-    secondary: '#0066FF',      // Azul
-    accent: '#FF7F00',         // Naranja
-    danger: '#E63946',         // Rojo
+    // Primary brand colors — from logo
+    primary: '#56B330',        // Verde logo (pin superior)
+    secondary: '#1E7FE0',      // Azul logo (pin derecho)
+    accent: '#F4511E',         // Naranja-rojo logo (base del pin)
+    navy: '#1B2880',           // Azul marino (texto "Spot")
+    danger: '#E63946',         // Rojo error
 
     // Typography
-    text: '#333333',           // Gris oscuro principal
-    textSecondary: '#666666',  // Gris medio
-    textTertiary: '#999999',   // Gris claro
+    text: '#1A1A2E',           // Casi negro con tinte navy del logo
+    textSecondary: '#5A5A72',  // Gris medio con tinte
+    textTertiary: '#9A9AB0',   // Gris claro
 
     // Backgrounds
     background: '#FFFFFF',
-    backgroundElement: '#F5F5F5',
-    backgroundSelected: '#E8F5E9',
+    backgroundElement: '#F4F6FB',  // Tinte azul muy suave
+    backgroundSelected: '#EDF6E6', // Tinte verde muy suave
 
     // Surfaces & inputs
-    surface: '#FFFFFF',        // Cards elevadas
-    border: '#E8E8E8',         // Bordes de inputs y separadores
-    inputBackground: '#F7F7F7', // Fondo de campos de texto
+    surface: '#FFFFFF',
+    border: '#E2E6F0',
+    inputBackground: '#F4F6FB',
 
     // States
-    success: '#00CA4E',
-    warning: '#FF7F00',
+    success: '#56B330',
+    warning: '#F4511E',
     error: '#E63946',
-    info: '#0066FF',
+    info: '#1E7FE0',
   },
   dark: {
-    // Primary brand colors (adjusted for dark mode)
-    primary: '#00E85C',
-    secondary: '#0088FF',
-    accent: '#FF9F3F',
+    // Primary brand colors — brightened for dark mode
+    primary: '#6DD43E',
+    secondary: '#4196F0',
+    accent: '#FF6B3D',
+    navy: '#4A6AE0',
     danger: '#FF6B7A',
 
     // Typography
     text: '#FFFFFF',
-    textSecondary: '#CCCCCC',
-    textTertiary: '#999999',
+    textSecondary: '#CCCCDD',
+    textTertiary: '#8888AA',
 
     // Backgrounds
-    background: '#0F0F0F',
-    backgroundElement: '#1A1A1A',
-    backgroundSelected: '#1E3A1F',
+    background: '#0D0D1A',
+    backgroundElement: '#161628',
+    backgroundSelected: '#1A3010',
 
     // Surfaces & inputs
-    surface: '#1C1C1C',
-    border: '#2C2C2C',
-    inputBackground: '#232323',
+    surface: '#1A1A2E',
+    border: '#2A2A44',
+    inputBackground: '#1E1E34',
 
     // States
-    success: '#00E85C',
-    warning: '#FF9F3F',
+    success: '#6DD43E',
+    warning: '#FF6B3D',
     error: '#FF6B7A',
-    info: '#0088FF',
+    info: '#4196F0',
   },
 } as const;
 
@@ -106,19 +111,20 @@ export const Spacing = {
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
 export const MaxContentWidth = 800;
 
+// Gradients mirror the logo pin: green (top-left) → orange-red (center) → blue (right)
 export const Gradients = {
   header: {
-    colors: ['#00CA4E', '#00A86B', '#0066FF'] as string[],
+    colors: ['#56B330', '#F4511E', '#1B2880'] as string[],
     start: { x: 0, y: 0 },
     end: { x: 1, y: 1 },
   },
   buttonPrimary: {
-    colors: ['#00CA4E', '#0066FF'] as string[],
+    colors: ['#56B330', '#1E7FE0'] as string[],
     start: { x: 0, y: 0 },
     end: { x: 1, y: 0 },
   },
   splash: {
-    colors: ['#00CA4E', '#00A86B', '#0044CC'] as string[],
+    colors: ['#56B330', '#F4511E', '#1B2880'] as string[],
     start: { x: 0, y: 0 },
     end: { x: 1, y: 1 },
   },

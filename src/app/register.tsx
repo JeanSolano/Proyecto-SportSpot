@@ -121,7 +121,7 @@ export default function RegisterScreen({ onGoLogin }: { onGoLogin?: () => void }
           </Pressable>
           <View style={styles.logoWrapper}>
             <Image
-              source={require('@/assets/images/logo-glow.png')}
+              source={require('@/assets/images/logo-official.png')}
               style={styles.logo}
               contentFit="contain"
             />

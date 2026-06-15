@@ -109,7 +109,7 @@ export default function LoginScreen({ onGoRegister }: { onGoRegister?: () => voi
           style={[styles.gradientHeader, { paddingTop: insets.top + Spacing.four }]}>
           <View style={styles.logoWrapper}>
             <Image
-              source={require('@/assets/images/logo-glow.png')}
+              source={require('@/assets/images/logo-official.png')}
               style={styles.logo}
               contentFit="contain"
             />

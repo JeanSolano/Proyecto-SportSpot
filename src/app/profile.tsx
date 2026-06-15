@@ -1,3 +1,4 @@
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
@@ -104,7 +105,10 @@ export default function ProfileScreen() {
 
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + Spacing.two }]}>
-        <Text style={[styles.brandName, { color: theme.primary }]}>SportSpot</Text>
+        <View style={styles.brandRow}>
+          <Image source={require('@/assets/images/logo-official.png')} style={styles.brandLogo} contentFit="contain" />
+          <Text style={[styles.brandName, { color: theme.navy }]}>SportSpot</Text>
+        </View>
       </View>
 
       {/* Banner + avatar */}
@@ -277,6 +281,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.three,
     paddingBottom: Spacing.two,
   },
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.one },
+  brandLogo: { width: 34, height: 34 },
   brandName: { ...Typography.displayMd },
   avatarRing: {
     position: 'absolute',

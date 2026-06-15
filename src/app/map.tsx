@@ -205,7 +205,10 @@ export default function MapScreen() {
       {/* Header overlay */}
       <View style={[styles.headerOverlay, { paddingTop: insets.top + Spacing.two }]}>
         <View style={[styles.headerCard, { backgroundColor: theme.background }, Shadows.card]}>
-          <Text style={[styles.brandName, { color: theme.primary }]}>SportSpot</Text>
+          <View style={styles.brandRow}>
+            <Image source={require('@/assets/images/logo-official.png')} style={styles.brandLogo} contentFit="contain" />
+            <Text style={[styles.brandName, { color: theme.navy }]}>SportSpot</Text>
+          </View>
           <View style={[styles.countBadge, { backgroundColor: theme.backgroundSelected }]}>
             <Text style={[styles.countText, { color: theme.primary }]}>{VENUES.length} canchas</Text>
           </View>
@@ -364,6 +367,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.two,
   },
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.one },
+  brandLogo: { width: 30, height: 30 },
   brandName: { ...Typography.displayMd },
   countBadge: {
     paddingHorizontal: Spacing.two,
