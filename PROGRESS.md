@@ -24,23 +24,27 @@
 
 ## Design System (`src/constants/theme.ts`)
 
+> Colores actualizados para coincidir con el logo oficial. Los tres colores del pin (verde → naranja-rojo → azul marino) definen toda la identidad visual.
+
 ### Colores de Marca
 
-| Token | Light | Dark | Uso |
+| Token | Light | Dark | Origen / Uso |
 |---|---|---|---|
-| `primary` | `#00CA4E` | `#00E85C` | Verde principal, CTAs |
-| `secondary` | `#0066FF` | `#0088FF` | Azul, íconos de acción |
-| `accent` | `#FF7F00` | `#FF9F3F` | Naranja de energía |
-| `surface` | `#FFFFFF` | `#1C1C1C` | Fondo de cards |
-| `border` | `#E8E8E8` | `#2C2C2C` | Bordes de inputs |
-| `inputBackground` | `#F7F7F7` | `#232323` | Fondo de campos |
+| `primary` | `#56B330` | `#6DD43E` | Verde del pin (arriba) — CTAs |
+| `secondary` | `#1E7FE0` | `#4196F0` | Azul del pin (derecha) — íconos de acción |
+| `accent` | `#F4511E` | `#FF6B3D` | Naranja-rojo del pin (base) — energía |
+| `navy` | `#1B2880` | `#4A6AE0` | Azul marino del texto "Spot" — headers |
+| `surface` | `#FFFFFF` | `#1A1A2E` | Fondo de cards |
+| `border` | `#E2E6F0` | `#2A2A44` | Bordes de inputs |
+| `inputBackground` | `#F4F6FB` | `#1E1E34` | Fondo de campos |
+| `text` | `#1A1A2E` | `#FFFFFF` | Texto principal (tinte navy) |
 
 ### Gradientes (`Gradients`)
 
 ```ts
-header:        ['#00CA4E', '#00A86B', '#0066FF']  // Login, perfil, banners
-buttonPrimary: ['#00CA4E', '#0066FF']              // Botones CTA
-splash:        ['#00CA4E', '#00A86B', '#0044CC']   // Onboarding
+header:        ['#56B330', '#F4511E', '#1B2880']  // Espeja el pin del logo: verde→naranja→navy
+buttonPrimary: ['#56B330', '#1E7FE0']              // Verde→azul
+splash:        ['#56B330', '#F4511E', '#1B2880']   // Igual que header
 ```
 
 ### Border Radius (`BorderRadius`)
@@ -117,19 +121,20 @@ App abre → Splash animation
 
 ### 1. Login (`login.tsx`)
 
-- Header con gradiente verde→azul y logo de SportSpot en círculo semi-transparente
+- Header con gradiente verde→naranja→navy (colores del logo) y logo oficial en círculo
 - Card blanca con esquinas redondeadas superpuesta al gradiente
 - Campos con ícono, borde activo al enfocar, label superior
 - Validación: ambos campos requeridos (password mín. 4 chars)
 - Botón "Iniciar Sesión" con gradiente, deshabilitado (opacity 0.55) si faltan datos
 - `ActivityIndicator` durante la simulación de carga
 - Links: "¿Olvidaste tu contraseña?", "Regístrate gratis"
-- Botones sociales: Google + Facebook (estructura lista para integrar SDK)
+- Botón social: **Google únicamente** (Facebook eliminado)
 - Footer de Términos y Privacidad
 
 ### 2. Register (`register.tsx`)
 
-- Mismo header de marca que login
+- Mismo header de marca que login con logo oficial
+- Botón "← Volver" en la parte superior del gradiente para regresar al login sin salir de la app
 - 4 campos: Nombre, Email, Contraseña, Confirmar contraseña
 - Selector de deporte favorito (chips: Fútbol, Basketball, Tenis, Voleibol, Natación, Otro)
 - Hints de validación en tiempo real: "Mín. 6 caracteres" y "Contraseñas coinciden"
@@ -138,7 +143,7 @@ App abre → Splash animation
 
 ### 3. Home / Discover (`index.tsx`)
 
-- Header fijo con "SportSpot" en verde y pill "↗ Popular"
+- Header fijo con logo oficial (32px) + "SportSpot" en navy y pill "↗ Popular"
 - Filtros horizontales por deporte (pills: Todos, Fútbol, Basketball, Tenis, Voleibol, Natación)
 - Feed vertical de cards de venues:
   - **Imagen real** (Unsplash) con gradiente overlay para texto
@@ -169,7 +174,7 @@ App abre → Splash animation
   - 🎾 Tenis `#FF7F00`
   - 🏐 Voleibol `#9C27B0`
 - Marcador seleccionado se expande mostrando nombre del venue
-- Header flotante con "SportSpot" + contador "4 canchas"
+- Header flotante con logo oficial (30px) + "SportSpot" en navy + contador "4 canchas"
 - **Bottom sheet modal** animado (spring animation):
   - Desliza desde abajo al tocar un marcador
   - Foto real del venue + badge de deporte
@@ -181,7 +186,7 @@ App abre → Splash animation
 
 ### 5. Perfil (`profile.tsx`)
 
-- Header "SportSpot" en verde
+- Header con logo oficial (34px) + "SportSpot" en navy
 - Banner con gradiente verde→azul (full width)
 - Avatar circular superpuesto al banner (emoji 🏃 + gradiente gris)
 - Nombre: Carlos Méndez / @carlosdeportivo
@@ -193,6 +198,7 @@ App abre → Splash animation
   - Chip de estado: `● Confirmada` (verde) / `✗ Cancelada` (gris)
   - Botón "Cancelar" en reservas confirmadas con `Alert` de confirmación
   - Estado vacío con mensaje guía si no hay reservas
+- **Botón "Panel de Establecimiento"** (🏟️) → abre `EstablishmentDashboard` en modal de pantalla completa
 - Sección "Cuenta":
   - Editar Perfil (con ícono + chevron)
   - Ubicación: "Ciudad de Panamá" (con subtítulo)
@@ -238,6 +244,40 @@ App abre → Splash animation
 | Club de Tenis Paitilla | 08:00, 09:00, 14:00, 15:00 |
 | Club Costa Verde (Voleibol) | 11:00, 12:00, 19:00, 20:00 |
 
+### 8. Detalle de Venue (`VenueDetailModal`)
+
+Accessible tocando la imagen de cualquier card en el feed o el nombre del venue en el mapa.
+
+- Modal de pantalla completa con animación `slide`
+- Hero image 280px con botón de cierre flotante (círculo blanco, posición absoluta)
+- Botón "like" en el hero (sincronizado con `likedIds` global del `BookingsContext`)
+- Sección de amenidades por deporte (4 ítems cada uno: Basketball, Fútbol, Tenis, Voleibol)
+- Sección de reseñas (2 reseñas mock por venue con avatar, rating ★, texto)
+- Info row: disponibilidad + precio/hora
+- Botón sticky "Reservar cancha" en la parte inferior → cierra el detalle y abre `BookingModal` después de 180ms (para evitar doble modal)
+
+### 9. Panel de Establecimiento (`EstablishmentDashboard`)
+
+Vista de demostración del dashboard para dueños de establecimientos. Sin roles ni cambios de autenticación. Se abre desde el botón 🏟️ en el perfil.
+
+- Header con gradiente del logo + botón ✕ de cierre
+- **Selector de venues** (scroll horizontal): 4 tabs con emoji de deporte y color por categoría
+- **Stats del día** (3 cards): Reservas hoy, Ingresos ($), Ocupación (%)
+  - Los valores se calculan dinámicamente: datos mock + reservas reales de la sesión
+- **Lista de reservas de hoy**: mezcla de bookings mock (nombres ficticios) y reservas reales hechas en la sesión actual
+- **Grid de disponibilidad** (7:00–21:00, 15 slots):
+  - 🟢 Disponible — toca para bloquear
+  - 🔒 Bloqueado por propietario — toca para desbloquear
+  - 🔴 Reservado — no modificable
+  - Estado inicial: bloques de almuerzo preconfigurados por venue
+- Disclaimer al pie explicando que es una demo sin backend
+
+### 10. Identidad Visual (`assets/images/logo-official.png`)
+
+- Logo oficial agregado al proyecto en `assets/images/logo-official.png`
+- Visible en: Login (header, 95px), Register (header, 95px), Home (header, 32px), Mapa (header, 30px), Perfil (header, 34px)
+- Colores de `theme.ts` actualizados para coincidir exactamente con el logo oficial
+
 ### 6. Navigation Shell (`app-tabs.tsx`)
 
 - 3 tabs con `NativeTabs` (expo-router/unstable-native-tabs):
@@ -262,20 +302,20 @@ App abre → Splash animation
 | RF-07 | Reserva de cancha | ✅ Flujo completo: fecha, hora, duración, confirmación |
 | RF-08 | Cancelación de reserva | ✅ Desde "Mis Reservas" en perfil |
 | RF-10 | Historial de reservas | ✅ Sección "Mis Reservas" en perfil (sesión actual) |
+| RF-11 | Dashboard del establecimiento | ✅ Demo visual (sin roles/backend) |
+| RF-12 | Gestión de disponibilidad | ✅ Grid togglable en el dashboard demo |
 | RF-14 | Publicación de eventos/promociones | ✅ Cards en el feed |
-| RF-15 | Red social (likes, comentarios) | ✅ Like interactivo en feed |
+| RF-15 | Red social (likes, comentarios) | ✅ Like interactivo en feed, detalle y mapa |
 
 ---
 
 ## Pendiente
 
 - [ ] Pago en línea (RF-09): integración con pasarela de pago
-- [ ] Dashboard del establecimiento (RF-11)
-- [ ] Gestión de disponibilidad (RF-12)
-- [ ] Pantalla de detalle de venue (expandir card del feed)
 - [ ] Pantalla de recuperación de contraseña (RF-03)
 - [ ] Persistencia de sesión (AsyncStorage o SecureStore)
 - [ ] Persistencia de reservas entre sesiones
+- [ ] Sistema de roles real (usuario vs. propietario) cuando haya backend
 - [ ] Integración con backend real (auth, reservas, disponibilidad)
 - [ ] Restaurar `react-native-maps` con Google Maps API Key cuando haya backend
 - [ ] Íconos de tabs personalizados (actualmente placeholder)
@@ -286,23 +326,29 @@ App abre → Splash animation
 ## Estructura de Archivos Relevantes
 
 ```
+assets/
+└── images/
+    └── logo-official.png  ← Logo oficial (usado en todos los headers)
+
 src/
 ├── app/
-│   ├── _layout.tsx        ← AuthProvider + condicional auth/tabs
+│   ├── _layout.tsx        ← AuthProvider + BookingsProvider + condicional auth/tabs
 │   ├── index.tsx          ← Home/Discover (exporta VENUES)
-│   ├── map.tsx            ← Mapa con bottom sheet
-│   ├── profile.tsx        ← Perfil + logout
-│   ├── login.tsx          ← Login con simulación
-│   └── register.tsx       ← Registro con validación
+│   ├── map.tsx            ← Mapa mock con marcadores y bottom sheet
+│   ├── profile.tsx        ← Perfil + Mis Reservas + Panel de Establecimiento
+│   ├── login.tsx          ← Login (Google como único social)
+│   └── register.tsx       ← Registro con botón "← Volver"
 ├── components/
-│   ├── app-tabs.tsx       ← 3 tabs (Inicio/Mapa/Perfil)
-│   ├── animated-icon.tsx  ← Splash overlay animado
-│   └── booking-modal.tsx  ← Flujo completo de reserva (Modal)
+│   ├── app-tabs.tsx              ← 3 tabs (Inicio/Mapa/Perfil)
+│   ├── animated-icon.tsx         ← Splash overlay animado
+│   ├── booking-modal.tsx         ← Flujo completo de reserva (3 fases)
+│   ├── venue-detail-modal.tsx    ← Detalle completo del venue (amenidades + reseñas)
+│   └── establishment-dashboard.tsx ← Dashboard demo de propietario
 ├── constants/
-│   └── theme.ts           ← Colors, Gradients, BorderRadius, Shadows, Typography, Spacing
+│   └── theme.ts           ← Colors (con navy nuevo), Gradients, BorderRadius, Shadows, Typography, Spacing
 ├── context/
 │   ├── auth.tsx           ← AuthContext (isAuthenticated, login, logout)
-│   └── bookings.tsx       ← BookingsContext (bookings[], openBooking, addBooking, cancelBooking)
+│   └── bookings.tsx       ← BookingsContext (bookings, modales, likedIds globales)
 └── hooks/
     └── use-theme.ts       ← Retorna Colors[colorScheme]
 ```
