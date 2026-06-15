@@ -18,7 +18,6 @@
 | expo-linear-gradient | SDK 56 | Gradientes de marca |
 | expo-image | ~56.0.11 | Carga de imágenes optimizada |
 | expo-symbols | ~56.0.6 | Íconos nativos |
-| react-native-maps | SDK 56 | Mapa interactivo |
 | react-native-reanimated | 4.3.1 | Animaciones |
 
 ---
@@ -80,10 +79,10 @@ modal: elevation 8  // Bottom sheets
 
 ```
 src/app/
-├── _layout.tsx       ← Root layout con AuthProvider + condicional auth/tabs
+├── _layout.tsx       ← Root layout con AuthProvider + BookingsProvider + condicional auth/tabs
 ├── index.tsx         ← Home / Discover feed
-├── map.tsx           ← Mapa interactivo
-├── profile.tsx       ← Perfil de usuario
+├── map.tsx           ← Mapa mock (sin Google Maps API)
+├── profile.tsx       ← Perfil de usuario + Mis Reservas
 ├── login.tsx         ← Inicio de sesión
 └── register.tsx      ← Registro de cuenta
 ```
@@ -148,7 +147,7 @@ App abre → Splash animation
   - Avatar con iniciales + nombre del establecimiento + rating ★ + ubicación 📍
   - Badge de disponibilidad y precio por hora
   - Contador de likes (interactivo, toggle ♡/♥) y comentarios
-  - Botón "Reservar" con fondo verde
+  - Botón "Reservar" → abre flujo de reserva (`BookingModal`)
   - Timestamp relativo ("Hace 2h")
 - Estado vacío cuando no hay canchas en la categoría seleccionada
 - Datos exportados (`export const VENUES`) para compartir con el mapa
@@ -161,22 +160,24 @@ App abre → Splash animation
 
 ### 4. Mapa (`map.tsx`)
 
-- `MapView` pantalla completa centrado en Ciudad de Panamá
-- Header flotante con "SportSpot" + contador "4 canchas" sobre el mapa
-- Marcadores personalizados por sport con emoji + color de marca:
+- **Mapa mock** (sin `react-native-maps`, sin Google Maps API Key) renderizado con Views puras de React Native
+  - Fondo estilizado al estilo OSM: tierra `#EDE9E0`, Canal de Panamá, Océano Pacífico, Bahía, parques
+  - Grid de calles y Cinta Costera como capas de Views
+- Marcadores posicionados geográficamente: las coordenadas lat/lng de cada venue se convierten a posición porcentual sobre el mapa mock
   - 🏀 Basketball `#0066FF`
   - ⚽ Fútbol `#00CA4E`
   - 🎾 Tenis `#FF7F00`
   - 🏐 Voleibol `#9C27B0`
 - Marcador seleccionado se expande mostrando nombre del venue
+- Header flotante con "SportSpot" + contador "4 canchas"
 - **Bottom sheet modal** animado (spring animation):
   - Desliza desde abajo al tocar un marcador
   - Foto real del venue + badge de deporte
   - Nombre, rating, ubicación, disponibilidad, precio/hora
-  - Like interactivo + botón "Reservar cancha" con gradiente
+  - Like interactivo + botón "Reservar cancha" → abre `BookingModal`
   - Se cierra tocando fuera del sheet
 
-> **Nota Android:** Requiere Google Maps API Key en `app.json`. En iOS funciona con MapKit sin configuración adicional.
+> **Nota:** Google Maps reemplazado por mock frontend. Cuando se integre backend real, se puede restaurar `react-native-maps` añadiendo la API Key.
 
 ### 5. Perfil (`profile.tsx`)
 
@@ -187,11 +188,55 @@ App abre → Splash animation
 - Badges: 🏅 Miembro Premium (dorado) + 🌐 Fútbol (azul)
 - Bio de usuario
 - Stats en cards: 📅 24 Reservas | ♥ 12 Favoritos | 🏆 3 Torneos
+- **Sección "Mis Reservas"** (dinámica, desde `BookingsContext`):
+  - Lista de reservas con emoji de deporte, nombre del venue, fecha, horario y precio
+  - Chip de estado: `● Confirmada` (verde) / `✗ Cancelada` (gris)
+  - Botón "Cancelar" en reservas confirmadas con `Alert` de confirmación
+  - Estado vacío con mensaje guía si no hay reservas
 - Sección "Cuenta":
   - Editar Perfil (con ícono + chevron)
   - Ubicación: "Ciudad de Panamá" (con subtítulo)
   - Notificaciones (Switch toggle)
 - Botón "Cerrar Sesión" con borde rojo → vuelve a pantalla de login
+
+### 7. Flujo de Reserva (`BookingModal` + `BookingsContext`)
+
+**Disparadores:** botón "Reservar" en Home feed y "Reservar cancha" en el bottom sheet del mapa.
+
+**Modal de reserva** (`src/components/booking-modal.tsx`) — 3 fases:
+
+1. **Formulario de selección:**
+   - Mini card del venue (imagen, deporte, rating, precio/hora)
+   - Selector de fecha: scroll horizontal con los próximos 7 días
+   - Grid de horarios (07:00–21:00, 15 slots en 3 columnas):
+     - Slots bloqueados (mock por venue): deshabilitados con etiqueta "No disp."
+     - Slot seleccionado: fondo verde primario
+   - Selector de duración: chips 1h / 2h / 3h con precio calculado
+   - Resumen de precio: cancha, fecha, horario, duración, total
+   - Botón "Confirmar Reserva · $XX.00" sticky en la parte inferior (deshabilitado hasta seleccionar hora)
+
+2. **Loading:** spinner 900ms simulando procesamiento
+
+3. **Pantalla de éxito:**
+   - Ícono ✓ con gradiente verde→azul
+   - Número de reserva generado (`SP-XXXXXX`)
+   - Card resumen con foto del venue, horario y total
+   - Botón "Listo" cierra el modal
+
+**Estado de reservas** (`src/context/bookings.tsx`):
+- `bookings[]` en memoria (sin persistencia)
+- `openBooking(venue)` — abre el modal
+- `addBooking(data)` — agrega con `status: 'confirmed'`
+- `cancelBooking(id)` — marca `status: 'cancelled'`
+
+**Slots bloqueados mock por venue:**
+
+| Venue | Horas no disponibles |
+|---|---|
+| Club Deportivo Albrook (Basketball) | 09:00, 10:00, 15:00, 16:00 |
+| Complejo Miraflores (Fútbol) | 10:00, 11:00, 17:00, 18:00 |
+| Club de Tenis Paitilla | 08:00, 09:00, 14:00, 15:00 |
+| Club Costa Verde (Voleibol) | 11:00, 12:00, 19:00, 20:00 |
 
 ### 6. Navigation Shell (`app-tabs.tsx`)
 
@@ -212,9 +257,11 @@ App abre → Splash animation
 | RF-02 | Inicio de sesión | ✅ Con simulación de auth |
 | RF-03 | Recuperación de contraseña | 🔗 Link presente (sin flujo aún) |
 | RF-04 | Gestión de perfil | ✅ Vista de perfil + editar (link) |
-| RF-05 | Búsqueda de canchas por mapa | ✅ MapView con marcadores |
-| RF-06 | Consulta de disponibilidad | ✅ Badge en cards y mapa |
-| RF-07 | Reserva de cancha | 🔗 Botón presente (sin flujo aún) |
+| RF-05 | Búsqueda de canchas por mapa | ✅ Mapa mock con marcadores por coordenadas |
+| RF-06 | Consulta de disponibilidad | ✅ Badge en cards, mapa y slots de reserva |
+| RF-07 | Reserva de cancha | ✅ Flujo completo: fecha, hora, duración, confirmación |
+| RF-08 | Cancelación de reserva | ✅ Desde "Mis Reservas" en perfil |
+| RF-10 | Historial de reservas | ✅ Sección "Mis Reservas" en perfil (sesión actual) |
 | RF-14 | Publicación de eventos/promociones | ✅ Cards en el feed |
 | RF-15 | Red social (likes, comentarios) | ✅ Like interactivo en feed |
 
@@ -222,17 +269,15 @@ App abre → Splash animation
 
 ## Pendiente
 
-- [ ] Flujo de reserva (RF-07): selección de fecha/hora, confirmación
 - [ ] Pago en línea (RF-09): integración con pasarela de pago
-- [ ] Cancelación de reserva (RF-08)
-- [ ] Historial de reservas (RF-10)
 - [ ] Dashboard del establecimiento (RF-11)
 - [ ] Gestión de disponibilidad (RF-12)
-- [ ] Pantalla de detalle de venue (expandir card)
+- [ ] Pantalla de detalle de venue (expandir card del feed)
 - [ ] Pantalla de recuperación de contraseña (RF-03)
 - [ ] Persistencia de sesión (AsyncStorage o SecureStore)
-- [ ] Integración con backend real
-- [ ] Google Maps API Key para Android
+- [ ] Persistencia de reservas entre sesiones
+- [ ] Integración con backend real (auth, reservas, disponibilidad)
+- [ ] Restaurar `react-native-maps` con Google Maps API Key cuando haya backend
 - [ ] Íconos de tabs personalizados (actualmente placeholder)
 - [ ] Pantalla de editar perfil
 
@@ -251,11 +296,13 @@ src/
 │   └── register.tsx       ← Registro con validación
 ├── components/
 │   ├── app-tabs.tsx       ← 3 tabs (Inicio/Mapa/Perfil)
-│   └── animated-icon.tsx  ← Splash overlay animado
+│   ├── animated-icon.tsx  ← Splash overlay animado
+│   └── booking-modal.tsx  ← Flujo completo de reserva (Modal)
 ├── constants/
 │   └── theme.ts           ← Colors, Gradients, BorderRadius, Shadows, Typography, Spacing
 ├── context/
-│   └── auth.tsx           ← AuthContext (isAuthenticated, login, logout)
+│   ├── auth.tsx           ← AuthContext (isAuthenticated, login, logout)
+│   └── bookings.tsx       ← BookingsContext (bookings[], openBooking, addBooking, cancelBooking)
 └── hooks/
     └── use-theme.ts       ← Retorna Colors[colorScheme]
 ```
