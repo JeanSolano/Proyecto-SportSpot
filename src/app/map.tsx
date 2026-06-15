@@ -9,19 +9,21 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import MapView, { Marker, Region } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { VENUES, type Venue } from './index';
 import { BorderRadius, Shadows, Spacing, Typography } from '@/constants/theme';
+import { useBookings } from '@/context/bookings';
 import { useTheme } from '@/hooks/use-theme';
 
-const PANAMA_CITY: Region = {
-  latitude: 8.9936,
-  longitude: -79.5197,
-  latitudeDelta: 0.09,
-  longitudeDelta: 0.09,
-};
+// Geographic bounds that contain all venues — no API key needed
+const BOUNDS = { latMin: 8.970, latMax: 9.020, lngMin: -79.600, lngMax: -79.440 };
+
+function toMapPos(coord: { latitude: number; longitude: number }) {
+  const x = ((coord.longitude - BOUNDS.lngMin) / (BOUNDS.lngMax - BOUNDS.lngMin)) * 100;
+  const y = ((BOUNDS.latMax - coord.latitude) / (BOUNDS.latMax - BOUNDS.latMin)) * 100;
+  return { left: `${x.toFixed(1)}%` as string, top: `${y.toFixed(1)}%` as string };
+}
 
 const SPORT_EMOJI: Record<string, string> = {
   Basketball: '🏀',
@@ -32,9 +34,124 @@ const SPORT_EMOJI: Record<string, string> = {
 
 const SHEET_HEIGHT = 230;
 
+// ─── Mock Map Background ──────────────────────────────────────────────────────
+function MockMapBackground() {
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      {/* Base land */}
+      <View style={[StyleSheet.absoluteFill, { backgroundColor: '#EDE9E0' }]} />
+
+      {/* Panama Canal water channel (far west) */}
+      <View style={bg.canal} />
+
+      {/* Parque Natural Metropolitano (NW green) */}
+      <View style={bg.parkNatural} />
+
+      {/* Albrook / Parque Omar area (center-W green) */}
+      <View style={bg.parkAlbrook} />
+
+      {/* Parque recreativo (center) */}
+      <View style={bg.parkCenter} />
+
+      {/* Pacific Ocean (south) */}
+      <View style={bg.pacific} />
+
+      {/* Panama Bay (SE) */}
+      <View style={bg.bay} />
+
+      {/* Major roads — horizontal */}
+      <View style={[bg.road, { top: '35%', height: 3 }]} />
+      <View style={[bg.road, { top: '50%', height: 3 }]} />
+      <View style={[bg.road, { top: '62%' }]} />
+      <View style={[bg.road, { top: '72%' }]} />
+
+      {/* Major roads — vertical */}
+      <View style={[bg.roadV, { left: '22%' }]} />
+      <View style={[bg.roadV, { left: '37%' }]} />
+      <View style={[bg.roadV, { left: '53%', width: 3 }]} />
+      <View style={[bg.roadV, { left: '68%' }]} />
+      <View style={[bg.roadV, { left: '82%' }]} />
+
+      {/* Cinta Costera coastal road */}
+      <View style={bg.cintaCostera} />
+
+      {/* City label */}
+      <View style={bg.labelContainer}>
+        <Text style={bg.labelText}>Ciudad de Panamá</Text>
+      </View>
+    </View>
+  );
+}
+
+const bg = StyleSheet.create({
+  canal: {
+    position: 'absolute', top: 0, left: 0, bottom: '18%',
+    width: '5%',
+    backgroundColor: '#AACCE4',
+  },
+  parkNatural: {
+    position: 'absolute', top: '5%', left: '5%',
+    width: '18%', height: '18%',
+    backgroundColor: '#B5D4A8',
+    borderRadius: 6,
+  },
+  parkAlbrook: {
+    position: 'absolute', top: '28%', left: '8%',
+    width: '13%', height: '16%',
+    backgroundColor: '#B5D4A8',
+    borderRadius: 4,
+  },
+  parkCenter: {
+    position: 'absolute', top: '15%', left: '38%',
+    width: '8%', height: '10%',
+    backgroundColor: '#C4DDB8',
+    borderRadius: 4,
+  },
+  pacific: {
+    position: 'absolute', bottom: 0, left: 0, right: 0,
+    height: '18%',
+    backgroundColor: '#AACCE4',
+  },
+  bay: {
+    position: 'absolute', bottom: 0, right: 0,
+    width: '32%', height: '40%',
+    backgroundColor: '#AACCE4',
+    borderTopLeftRadius: 100,
+  },
+  road: {
+    position: 'absolute', left: 0, right: 0,
+    height: 2,
+    backgroundColor: '#F5F2EC',
+  },
+  roadV: {
+    position: 'absolute', top: 0, bottom: 0,
+    width: 2,
+    backgroundColor: '#F5F2EC',
+  },
+  cintaCostera: {
+    position: 'absolute',
+    bottom: '17%', left: '5%', right: '30%',
+    height: 4,
+    backgroundColor: '#DDD8CC',
+    borderRadius: 2,
+  },
+  labelContainer: {
+    position: 'absolute',
+    top: '44%', left: '30%',
+  },
+  labelText: {
+    fontSize: 10,
+    color: '#9A9080',
+    fontStyle: 'italic',
+    letterSpacing: 0.8,
+  },
+});
+
+// ─── Screen ───────────────────────────────────────────────────────────────────
 export default function MapScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+  const { openBooking } = useBookings();
   const [selected, setSelected] = useState<Venue | null>(null);
   const sheetAnim = useRef(new Animated.Value(SHEET_HEIGHT)).current;
   const [liked, setLiked] = useState<Record<string, boolean>>({});
@@ -61,31 +178,32 @@ export default function MapScreen() {
 
   return (
     <View style={styles.screen}>
-      {/* Map full screen */}
-      <MapView
-        style={StyleSheet.absoluteFill}
-        initialRegion={PANAMA_CITY}
-        showsUserLocation
-        showsMyLocationButton={false}>
-        {VENUES.map(venue => (
-          <Marker
+      {/* Mock map replaces MapView */}
+      <MockMapBackground />
+
+      {/* Venue markers positioned by lat/lng */}
+      {VENUES.map(venue => {
+        const pos = toMapPos(venue.coordinate);
+        const isSelected = selected?.id === venue.id;
+        return (
+          <Pressable
             key={venue.id}
-            coordinate={venue.coordinate}
+            style={[styles.markerAnchor, { left: pos.left as any, top: pos.top as any }]}
             onPress={() => openSheet(venue)}>
             <View style={[
               styles.markerBubble,
               { backgroundColor: venue.sportColor },
-              selected?.id === venue.id && styles.markerSelected,
+              isSelected && styles.markerSelected,
             ]}>
               <Text style={styles.markerEmoji}>{SPORT_EMOJI[venue.sport] ?? '📍'}</Text>
-              {selected?.id === venue.id && (
+              {isSelected && (
                 <Text style={styles.markerLabel} numberOfLines={1}>{venue.venueName}</Text>
               )}
             </View>
             <View style={[styles.markerTail, { borderTopColor: venue.sportColor }]} />
-          </Marker>
-        ))}
-      </MapView>
+          </Pressable>
+        );
+      })}
 
       {/* Header overlay */}
       <View style={[styles.headerOverlay, { paddingTop: insets.top + Spacing.two }]}>
@@ -97,10 +215,8 @@ export default function MapScreen() {
         </View>
       </View>
 
-      {/* Tap backdrop to dismiss */}
-      {selected && (
-        <Pressable style={styles.backdrop} onPress={closeSheet} />
-      )}
+      {/* Tap backdrop to dismiss sheet */}
+      {selected && <Pressable style={styles.backdrop} onPress={closeSheet} />}
 
       {/* Bottom sheet modal */}
       <Animated.View
@@ -114,14 +230,11 @@ export default function MapScreen() {
         ]}>
         {selected && (
           <>
-            {/* Handle */}
             <View style={styles.sheetHandleRow}>
               <View style={[styles.sheetHandle, { backgroundColor: theme.border }]} />
             </View>
 
-            {/* Content */}
             <View style={styles.sheetContent}>
-              {/* Left: image */}
               <View style={styles.sheetImageWrapper}>
                 <Image
                   source={{ uri: selected.imageUrl }}
@@ -134,7 +247,6 @@ export default function MapScreen() {
                 </View>
               </View>
 
-              {/* Right: details */}
               <View style={styles.sheetDetails}>
                 <Text style={[styles.sheetTitle, { color: theme.text }]} numberOfLines={2}>
                   {selected.title}
@@ -148,7 +260,6 @@ export default function MapScreen() {
                     {selected.rating}  📍 {selected.location}
                   </Text>
                 </View>
-
                 <View style={styles.sheetInfoRow}>
                   <View style={[
                     styles.availChip,
@@ -168,7 +279,6 @@ export default function MapScreen() {
               </View>
             </View>
 
-            {/* Actions row */}
             <View style={styles.sheetActions}>
               <Pressable onPress={() => toggleLike(selected.id)} style={styles.likeBtn}>
                 <Text style={[
@@ -181,7 +291,8 @@ export default function MapScreen() {
 
               <TouchableOpacity
                 style={[styles.reserveBtn, { backgroundColor: theme.primary }]}
-                activeOpacity={0.85}>
+                activeOpacity={0.85}
+                onPress={() => selected && openBooking(selected)}>
                 <LinearGradient
                   colors={['#00CA4E', '#0066FF']}
                   start={{ x: 0, y: 0 }}
@@ -201,6 +312,11 @@ export default function MapScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   // Markers
+  markerAnchor: {
+    position: 'absolute',
+    alignItems: 'center',
+    transform: [{ translateX: -20 }, { translateY: -40 }],
+  },
   markerBubble: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -209,6 +325,12 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
     gap: 4,
     maxWidth: 160,
+    // Shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
+    elevation: 4,
   },
   markerSelected: {
     paddingHorizontal: Spacing.two + 2,
@@ -270,11 +392,7 @@ const styles = StyleSheet.create({
     ...Shadows.modal,
   },
   sheetHandleRow: { alignItems: 'center', paddingTop: Spacing.two },
-  sheetHandle: {
-    width: 36,
-    height: 4,
-    borderRadius: BorderRadius.full,
-  },
+  sheetHandle: { width: 36, height: 4, borderRadius: BorderRadius.full },
   sheetContent: {
     flexDirection: 'row',
     gap: Spacing.three,
@@ -304,11 +422,7 @@ const styles = StyleSheet.create({
   star: { color: '#F5A623', fontSize: 13 },
   sheetRating: { ...Typography.caption },
   sheetInfoRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, marginTop: 2 },
-  availChip: {
-    paddingHorizontal: 6,
-    paddingVertical: 3,
-    borderRadius: BorderRadius.sm,
-  },
+  availChip: { paddingHorizontal: 6, paddingVertical: 3, borderRadius: BorderRadius.sm },
   availChipText: { ...Typography.badge },
   sheetPrice: { ...Typography.caption },
   // Actions
@@ -322,10 +436,6 @@ const styles = StyleSheet.create({
   likeBtn: { paddingVertical: 4 },
   likeBtnText: { ...Typography.body },
   reserveBtn: { flex: 1, borderRadius: BorderRadius.sm, overflow: 'hidden' },
-  reserveGradient: {
-    height: 46,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  reserveGradient: { height: 46, alignItems: 'center', justifyContent: 'center' },
   reserveText: { ...Typography.bodyBold, color: '#fff' },
 });

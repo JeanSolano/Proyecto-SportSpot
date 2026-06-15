@@ -4,7 +4,9 @@ import { useColorScheme } from 'react-native';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import AppTabs from '@/components/app-tabs';
+import BookingModal from '@/components/booking-modal';
 import { AuthProvider, useAuth } from '@/context/auth';
+import { BookingsProvider } from '@/context/bookings';
 import LoginScreen from './login';
 import RegisterScreen from './register';
 
@@ -26,7 +28,14 @@ function AppContent() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <AnimatedSplashOverlay />
-      {isAuthenticated ? <AppTabs /> : <AuthFlow />}
+      {isAuthenticated ? (
+        <>
+          <AppTabs />
+          <BookingModal />
+        </>
+      ) : (
+        <AuthFlow />
+      )}
     </ThemeProvider>
   );
 }
@@ -34,7 +43,9 @@ function AppContent() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <AppContent />
+      <BookingsProvider>
+        <AppContent />
+      </BookingsProvider>
     </AuthProvider>
   );
 }

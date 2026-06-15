@@ -5,6 +5,7 @@ import { Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BorderRadius, Shadows, Spacing, Typography } from '@/constants/theme';
+import { useBookings } from '@/context/bookings';
 import { useTheme } from '@/hooks/use-theme';
 
 const SPORTS = ['Todos', 'Fútbol', 'Basketball', 'Tenis', 'Voleibol', 'Natación'];
@@ -92,6 +93,7 @@ export type Venue = (typeof VENUES)[number];
 
 function VenueCard({ venue }: { venue: Venue }) {
   const theme = useTheme();
+  const { openBooking } = useBookings();
   const [liked, setLiked] = useState(false);
 
   return (
@@ -157,7 +159,10 @@ function VenueCard({ venue }: { venue: Venue }) {
             </Pressable>
             <Text style={[styles.statText, { color: theme.textSecondary }]}>💬 {venue.comments}</Text>
           </View>
-          <TouchableOpacity style={[styles.reserveBtn, { backgroundColor: theme.primary }]} activeOpacity={0.8}>
+          <TouchableOpacity
+            style={[styles.reserveBtn, { backgroundColor: theme.primary }]}
+            activeOpacity={0.8}
+            onPress={() => openBooking(venue)}>
             <Text style={styles.reserveText}>Reservar</Text>
           </TouchableOpacity>
         </View>

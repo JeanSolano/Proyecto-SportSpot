@@ -1,10 +1,11 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/context/auth';
+import { type Booking, useBookings } from '@/context/bookings';
 import { BorderRadius, Gradients, Shadows, Spacing, Typography } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -30,11 +31,68 @@ const AVATAR_SIZE = 84;
 const BANNER_HEIGHT = 150;
 const AVATAR_OVERLAP = AVATAR_SIZE / 2;
 
+const SPORT_EMOJI: Record<string, string> = {
+  Basketball: '🏀', Fútbol: '⚽', Tenis: '🎾', Voleibol: '🏐',
+};
+
+function BookingCard({
+  booking,
+  onCancel,
+}: {
+  booking: Booking;
+  onCancel: () => void;
+}) {
+  const theme = useTheme();
+  const confirmed = booking.status === 'confirmed';
+  return (
+    <View style={[bk.card, { backgroundColor: theme.surface }, Shadows.card]}>
+      <View style={[bk.sportIcon, { backgroundColor: booking.sportColor }]}>
+        <Text style={bk.sportEmoji}>{SPORT_EMOJI[booking.sport] ?? '🏟'}</Text>
+      </View>
+      <View style={bk.info}>
+        <View style={bk.topRow}>
+          <Text style={[bk.name, { color: theme.text }]} numberOfLines={1}>{booking.venueName}</Text>
+          <View style={[bk.statusChip, { backgroundColor: confirmed ? theme.backgroundSelected : theme.backgroundElement }]}>
+            <Text style={[bk.statusText, { color: confirmed ? theme.primary : theme.textTertiary }]}>
+              {confirmed ? '● Confirmada' : '✗ Cancelada'}
+            </Text>
+          </View>
+        </View>
+        <Text style={[bk.meta, { color: theme.textSecondary }]}>
+          {booking.dateLabel}  ·  {booking.startTime}–{booking.endTime}
+        </Text>
+        <View style={bk.footerRow}>
+          <Text style={[bk.price, { color: theme.text }]}>${booking.totalPrice}.00</Text>
+          {confirmed && (
+            <Pressable
+              onPress={onCancel}
+              style={[bk.cancelBtn, { borderColor: theme.error }]}>
+              <Text style={[bk.cancelText, { color: theme.error }]}>Cancelar</Text>
+            </Pressable>
+          )}
+        </View>
+      </View>
+    </View>
+  );
+}
+
 export default function ProfileScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const { logout } = useAuth();
+  const { bookings, cancelBooking } = useBookings();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+
+  function handleCancel(id: string) {
+    Alert.alert(
+      'Cancelar reserva',
+      '¿Deseas cancelar esta reserva?',
+      [
+        { text: 'No', style: 'cancel' },
+        { text: 'Sí, cancelar', style: 'destructive', onPress: () => cancelBooking(id) },
+      ],
+    );
+  }
 
   return (
     <ScrollView
@@ -92,6 +150,26 @@ export default function ProfileScreen() {
             <Text style={[styles.statLabel, { color: theme.textSecondary }]}>{stat.label}</Text>
           </View>
         ))}
+      </View>
+
+      {/* Mis Reservas */}
+      <View style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: theme.text }]}>Mis Reservas</Text>
+        {bookings.length === 0 ? (
+          <View style={[bk.empty, { backgroundColor: theme.backgroundElement }]}>
+            <Text style={bk.emptyIcon}>📅</Text>
+            <Text style={[bk.emptyTitle, { color: theme.text }]}>Sin reservas aún</Text>
+            <Text style={[bk.emptyHint, { color: theme.textSecondary }]}>
+              Reserva una cancha desde Inicio o Mapa
+            </Text>
+          </View>
+        ) : (
+          <View style={bk.list}>
+            {bookings.map(b => (
+              <BookingCard key={b.id} booking={b} onCancel={() => handleCancel(b.id)} />
+            ))}
+          </View>
+        )}
       </View>
 
       {/* Account settings */}
@@ -269,4 +347,51 @@ const styles = StyleSheet.create({
     marginTop: Spacing.two,
   },
   logoutText: { ...Typography.bodyBold },
+});
+
+// ─── Booking card styles ──────────────────────────────────────────────────────
+const bk = StyleSheet.create({
+  list: { gap: Spacing.two },
+  card: {
+    flexDirection: 'row',
+    borderRadius: BorderRadius.md,
+    padding: Spacing.two,
+    gap: Spacing.two,
+  },
+  sportIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: BorderRadius.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sportEmoji: { fontSize: 24 },
+  info: { flex: 1, gap: 4 },
+  topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.two },
+  name: { ...Typography.bodyBold, flex: 1 },
+  statusChip: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: BorderRadius.full,
+  },
+  statusText: { ...Typography.badge },
+  meta: { ...Typography.caption },
+  footerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 2 },
+  price: { ...Typography.bodyBold },
+  cancelBtn: {
+    paddingHorizontal: Spacing.two,
+    paddingVertical: 3,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+  },
+  cancelText: { ...Typography.badge },
+  empty: {
+    borderRadius: BorderRadius.md,
+    padding: Spacing.four,
+    alignItems: 'center',
+    gap: Spacing.one,
+  },
+  emptyIcon: { fontSize: 36 },
+  emptyTitle: { ...Typography.bodyBold },
+  emptyHint: { ...Typography.caption, textAlign: 'center' },
 });
