@@ -1,0 +1,21 @@
+{
+  "name": "sportspot-web-admin",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Panel web de administración para dueños de establecimientos deportivos (SportSpot). Solo frontend; el API de Node/Express se integrará más adelante.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.4.8"
+  }
+}
