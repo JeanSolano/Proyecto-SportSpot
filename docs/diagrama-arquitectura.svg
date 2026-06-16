@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 910" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="9" refY="4" orient="auto">
+      <path d="M0,0 L9,4 L0,8 Z" fill="#1A1A2E"/>
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#1B2880" flood-opacity="0.16"/>
+    </filter>
+    <style>
+      .card { fill:#FFFFFF; rx:14; filter:url(#shadow); }
+      .cat  { font-size:12px; font-weight:700; letter-spacing:1.2px; }
+      .tech { fill:#1A1A2E; font-size:21px; font-weight:700; }
+      .techsm { fill:#1A1A2E; font-size:18px; font-weight:700; }
+      .pur  { fill:#5A5A72; font-size:14px; }
+      .pursm{ fill:#5A5A72; font-size:12.5px; }
+      .band { rx:18; }
+      .bandtab { font-size:13px; font-weight:700; fill:#FFFFFF; letter-spacing:0.8px; }
+      .sublabel { font-size:12.5px; font-weight:700; letter-spacing:1px; }
+      .edge { stroke:#1A1A2E; stroke-width:2.5; fill:none; }
+      .dock { font-size:10.5px; font-weight:700; fill:#FFFFFF; }
+    </style>
+  </defs>
+
+  <rect width="1400" height="910" fill="#F7F8FC"/>
+  <text x="700" y="48" text-anchor="middle" font-size="30" font-weight="700" fill="#1B2880">Arquitectura por Capas — SportSpot</text>
+  <text x="700" y="76" text-anchor="middle" font-size="14.5" fill="#5A5A72">Frontend · Backend · Datos y servicios de terceros</text>
+
+  <!-- ===================== Fondos de capa (al fondo) ===================== -->
+  <rect x="40" y="100" width="1320" height="170" class="band" fill="#EAF2FC"/>
+  <rect x="40" y="348" width="1320" height="150" class="band" fill="#FCEDEF"/>
+  <rect x="40" y="548" width="1320" height="320" class="band" fill="#EEF6E8"/>
+
+  <!-- ===================== Flechas (detrás de tarjetas y texto) ===================== -->
+  <path class="edge" d="M490,248 L600,283" marker-end="url(#arrow)"/>
+  <path class="edge" d="M910,248 L800,283" marker-end="url(#arrow)"/>
+  <path class="edge" d="M700,333 L700,370" marker-end="url(#arrow)"/>
+
+  <path class="edge" d="M620,480 L235,634" marker-end="url(#arrow)"/>
+  <path class="edge" d="M660,480 L500,634" marker-end="url(#arrow)"/>
+  <path class="edge" d="M740,480 L812,634" marker-end="url(#arrow)"/>
+  <path class="edge" d="M770,480 L1014,634" marker-end="url(#arrow)"/>
+  <path class="edge" d="M800,480 L1216,634" marker-end="url(#arrow)"/>
+
+  <!-- ============================ CAPA 1: FRONTEND ============================ -->
+  <rect x="60" y="86" width="150" height="30" rx="8" fill="#1E7FE0"/>
+  <text x="135" y="106" text-anchor="middle" class="bandtab">FRONTEND</text>
+
+  <rect x="300" y="130" width="380" height="118" class="card"/>
+  <rect x="300" y="130" width="11" height="118" rx="5.5" fill="#56B330"/>
+  <text x="334" y="166" class="cat" fill="#56B330">FRONTEND MÓVIL</text>
+  <text x="334" y="198" class="tech">📱 React Native</text>
+  <text x="334" y="228" class="pur">App Android e iOS con un solo código.</text>
+
+  <rect x="720" y="130" width="380" height="118" class="card"/>
+  <rect x="720" y="130" width="11" height="118" rx="5.5" fill="#1E7FE0"/>
+  <text x="754" y="166" class="cat" fill="#1E7FE0">FRONTEND WEB</text>
+  <text x="754" y="198" class="tech">🖥️ Next.js</text>
+  <text x="754" y="228" class="pur">Dashboard administrativo profesional.</text>
+
+  <!-- AUTH gate (entre capas) -->
+  <rect x="430" y="285" width="540" height="48" rx="24" fill="#1B2880" filter="url(#shadow)"/>
+  <text x="700" y="315" text-anchor="middle" font-size="15.5" font-weight="700" fill="#FFFFFF">🔐 JWT + Roles — autenticación y control de accesos</text>
+
+  <!-- ============================ CAPA 2: BACKEND ============================ -->
+  <rect x="60" y="334" width="150" height="30" rx="8" fill="#E0234E"/>
+  <text x="135" y="354" text-anchor="middle" class="bandtab">BACKEND</text>
+
+  <rect x="470" y="372" width="460" height="108" class="card"/>
+  <rect x="470" y="372" width="11" height="108" rx="5.5" fill="#E0234E"/>
+  <text x="504" y="406" class="cat" fill="#E0234E">BACKEND</text>
+  <text x="504" y="438" class="tech">⚙️ NestJS (Node.js)</text>
+  <text x="504" y="466" class="pur">Lógica del servidor y APIs REST.</text>
+  <rect x="822" y="384" width="92" height="23" rx="11.5" fill="#2496ED"/>
+  <text x="868" y="400" text-anchor="middle" class="dock">🐳 Docker</text>
+
+  <!-- ================ CAPA 3: BASE DE DATOS · APIs · TERCEROS ================ -->
+  <rect x="60" y="534" width="520" height="30" rx="8" fill="#56B330"/>
+  <text x="320" y="554" text-anchor="middle" class="bandtab">BASE DE DATOS · APIs · SERVICIOS DE TERCEROS</text>
+
+  <!-- Sub-zona: Base de datos -->
+  <rect x="80" y="588" width="560" height="252" rx="14" fill="none" stroke="#336791" stroke-width="2.5" stroke-dasharray="8 6"/>
+  <text x="104" y="614" class="sublabel" fill="#336791">🗃️ BASE DE DATOS</text>
+
+  <rect x="110" y="636" width="250" height="180" class="card"/>
+  <rect x="110" y="636" width="11" height="180" rx="5.5" fill="#336791"/>
+  <text x="142" y="676" class="cat" fill="#336791">PRINCIPAL</text>
+  <text x="142" y="708" class="techsm">🗄️ PostgreSQL</text>
+  <text x="142" y="738" class="pursm">Usuarios, canchas</text>
+  <text x="142" y="759" class="pursm">y reservas.</text>
+  <rect x="278" y="648" width="72" height="22" rx="11" fill="#2496ED"/>
+  <text x="314" y="663" text-anchor="middle" class="dock">🐳 Docker</text>
+
+  <rect x="380" y="636" width="240" height="180" class="card"/>
+  <rect x="380" y="636" width="11" height="180" rx="5.5" fill="#D82C20"/>
+  <text x="412" y="676" class="cat" fill="#D82C20">CACHÉ / TIEMPO REAL</text>
+  <text x="412" y="708" class="techsm">⚡ Redis</text>
+  <text x="412" y="738" class="pursm">Disponibilidad en</text>
+  <text x="412" y="759" class="pursm">tiempo real.</text>
+  <rect x="538" y="648" width="72" height="22" rx="11" fill="#2496ED"/>
+  <text x="574" y="663" text-anchor="middle" class="dock">🐳 Docker</text>
+
+  <!-- Sub-zona: Servicios de terceros / APIs -->
+  <rect x="700" y="588" width="620" height="252" rx="14" fill="none" stroke="#5A5A72" stroke-width="2.5" stroke-dasharray="8 6"/>
+  <text x="724" y="614" class="sublabel" fill="#5A5A72">🌐 APIs · SERVICIOS DE TERCEROS</text>
+
+  <rect x="720" y="636" width="185" height="180" class="card"/>
+  <rect x="720" y="636" width="11" height="180" rx="5.5" fill="#FF6B00"/>
+  <text x="752" y="676" class="cat" fill="#FF6B00">PAGOS</text>
+  <text x="752" y="708" class="techsm">💳 Yappy</text>
+  <text x="752" y="738" class="pursm">+ pasarelas</text>
+  <text x="752" y="759" class="pursm">locales (Panamá).</text>
+
+  <rect x="922" y="636" width="185" height="180" class="card"/>
+  <rect x="922" y="636" width="11" height="180" rx="5.5" fill="#FFA000"/>
+  <text x="954" y="676" class="cat" fill="#F59E00">NOTIFICACIONES</text>
+  <text x="954" y="708" class="techsm">🔔 Firebase FCM</text>
+  <text x="954" y="738" class="pursm">Push a los</text>
+  <text x="954" y="759" class="pursm">usuarios.</text>
+
+  <rect x="1124" y="636" width="185" height="180" class="card"/>
+  <rect x="1124" y="636" width="11" height="180" rx="5.5" fill="#4264FB"/>
+  <text x="1156" y="676" class="cat" fill="#4264FB">MAPAS</text>
+  <text x="1156" y="708" class="techsm">🗺️ Mapbox</text>
+  <text x="1156" y="738" class="pursm">Mapas y geo-</text>
+  <text x="1156" y="759" class="pursm">localización.</text>
+</svg>
