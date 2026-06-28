@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
-import { addEstablishment, getEstablishment, updateEstablishment } from '../data/store';
+import { addEstablishment, getEstablishment, getEstablishments, getSubscription, updateEstablishment } from '../data/store';
+import { planById } from '../data/plans';
 import { AMENITIES } from '../data/constants';
 import CourtScheduleEditor from '../components/CourtScheduleEditor.jsx';
 
@@ -28,12 +29,28 @@ export default function EstablishmentForm() {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(isEdit);
 
+  // Paywall: al crear, exige plan activo y dentro del límite.
+  useEffect(() => {
+    if (isEdit) return;
+    Promise.all([getSubscription(owner.id), getEstablishments(owner.id)]).then(([sub, list]) => {
+      const plan = sub?.status === 'active' ? planById(sub.planId) : null;
+      if (!plan) {
+        navigate('/planes', { replace: true });
+        return;
+      }
+      if (list.length >= plan.maxEstablishments) {
+        window.alert(`Has alcanzado el límite de tu plan ${plan.name} (${plan.maxEstablishments}). Mejora tu plan para agregar más.`);
+        navigate('/suscripcion', { replace: true });
+      }
+    });
+  }, [isEdit, owner.id, navigate]);
+
   // Carga datos al editar.
   useEffect(() => {
     if (!isEdit) return;
     getEstablishment(id).then((e) => {
       if (!e) {
-        navigate('/', { replace: true });
+        navigate('/panel', { replace: true });
         return;
       }
       setName(e.name);
@@ -77,7 +94,7 @@ export default function EstablishmentForm() {
     try {
       if (isEdit) await updateEstablishment(id, payload);
       else await addEstablishment(payload);
-      navigate('/', { replace: true });
+      navigate('/panel', { replace: true });
     } catch (err) {
       setError(err.message);
       setSaving(false);

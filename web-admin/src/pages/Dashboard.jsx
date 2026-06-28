@@ -1,27 +1,41 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
-import { getEstablishments } from '../data/store';
+import { getEstablishments, getSubscription } from '../data/store';
+import { planById } from '../data/plans';
 import { amenity, courtType } from '../data/constants';
 
 export default function Dashboard() {
   const { owner } = useAuth();
   const navigate = useNavigate();
   const [establishments, setEstablishments] = useState([]);
+  const [sub, setSub] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getEstablishments(owner.id).then((data) => {
-      setEstablishments(data);
+    Promise.all([getEstablishments(owner.id), getSubscription(owner.id)]).then(([e, s]) => {
+      setEstablishments(e);
+      setSub(s);
       setLoading(false);
     });
   }, [owner.id]);
 
+  const plan = sub?.status === 'active' ? planById(sub.planId) : null;
+  const atLimit = plan && establishments.length >= plan.maxEstablishments;
   const totalCourts = establishments.reduce((sum, e) => sum + e.courts.length, 0);
-  const totalSlots = establishments.reduce(
-    (sum, e) => sum + e.courts.reduce((s, c) => s + c.slots.length * c.days.length, 0),
-    0,
-  );
+
+  const handleNew = () => {
+    if (!plan) {
+      navigate('/planes');
+      return;
+    }
+    if (atLimit) {
+      window.alert(`Has alcanzado el límite de tu plan ${plan.name} (${plan.maxEstablishments}). Mejora tu plan para agregar más.`);
+      navigate('/suscripcion');
+      return;
+    }
+    navigate('/establecimientos/nuevo');
+  };
 
   return (
     <>
@@ -30,12 +44,32 @@ export default function Dashboard() {
           <h2>Dashboard</h2>
           <span className="muted tiny">Hola, {owner.name} 👋</span>
         </div>
-        <button className="btn btn-primary" onClick={() => navigate('/establecimientos/nuevo')}>
-          ➕ Nuevo establecimiento
-        </button>
+        <button className="btn btn-primary" onClick={handleNew}>➕ Nuevo establecimiento</button>
       </div>
 
       <div className="content">
+        {/* Estado de suscripción */}
+        {!loading && !plan && (
+          <div className="card card-pad sub-banner">
+            <div>
+              <h3>Elige un plan para publicar 🚀</h3>
+              <p className="muted">Necesitas una suscripción activa para registrar y publicar tus establecimientos.</p>
+            </div>
+            <button className="btn btn-primary" onClick={() => navigate('/planes')}>Ver planes</button>
+          </div>
+        )}
+        {!loading && plan && (
+          <div className="card card-pad sub-banner" style={{ borderLeft: `4px solid ${plan.accent}` }}>
+            <div>
+              <h3>Plan {plan.name} · <span style={{ color: 'var(--primary)' }}>activo</span></h3>
+              <p className="muted">
+                {establishments.length} de {plan.maxEstablishments} establecimientos · {plan.commission}% de comisión por reserva
+              </p>
+            </div>
+            <button className="btn btn-outline btn-sm" onClick={() => navigate('/suscripcion')}>Gestionar</button>
+          </div>
+        )}
+
         <div className="stat-grid">
           <div className="card stat-card">
             <div className="stat-value">{establishments.length}</div>
@@ -46,8 +80,8 @@ export default function Dashboard() {
             <div className="stat-label">Canchas registradas</div>
           </div>
           <div className="card stat-card">
-            <div className="stat-value">{totalSlots}</div>
-            <div className="stat-label">Cupos semanales disponibles</div>
+            <div className="stat-value">{plan ? `${plan.commission}%` : '—'}</div>
+            <div className="stat-label">Comisión por reserva</div>
           </div>
         </div>
 
@@ -64,10 +98,10 @@ export default function Dashboard() {
             <span className="emoji">🏟️</span>
             <h3>Aún no tienes establecimientos</h3>
             <p className="muted" style={{ margin: '8px 0 20px' }}>
-              Registra tu primer establecimiento para empezar a recibir reservas.
+              {plan ? 'Registra tu primer establecimiento para empezar a recibir reservas.' : 'Elige un plan para empezar a publicar.'}
             </p>
-            <button className="btn btn-primary" onClick={() => navigate('/establecimientos/nuevo')}>
-              ➕ Registrar establecimiento
+            <button className="btn btn-primary" onClick={handleNew}>
+              {plan ? '➕ Registrar establecimiento' : '💳 Ver planes'}
             </button>
           </div>
         ) : (

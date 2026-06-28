@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from || '/panel';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -16,7 +18,7 @@ export default function Login() {
     setLoading(true);
     try {
       await login({ email, password });
-      navigate('/', { replace: true });
+      navigate(from, { replace: true });
     } catch (err) {
       setError(err.message);
       setLoading(false);
@@ -72,7 +74,7 @@ export default function Login() {
           </form>
 
           <p className="auth-switch">
-            ¿No tienes cuenta? <Link to="/register">Regístrate como dueño</Link>
+            ¿No tienes cuenta? <Link to="/register" state={{ from }}>Regístrate como dueño</Link>
           </p>
         </div>
       </div>

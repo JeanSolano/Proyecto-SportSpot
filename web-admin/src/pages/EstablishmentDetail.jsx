@@ -13,7 +13,7 @@ export default function EstablishmentDetail() {
 
   useEffect(() => {
     getEstablishment(id).then((e) => {
-      if (!e) navigate('/', { replace: true });
+      if (!e) navigate('/panel', { replace: true });
       else setEstab(e);
       setLoading(false);
     });
@@ -22,7 +22,7 @@ export default function EstablishmentDetail() {
   const handleDelete = async () => {
     if (!window.confirm('¿Eliminar este establecimiento? Esta acción no se puede deshacer.')) return;
     await deleteEstablishment(id);
-    navigate('/', { replace: true });
+    navigate('/panel', { replace: true });
   };
 
   if (loading || !estab) {
@@ -48,7 +48,7 @@ export default function EstablishmentDetail() {
       </div>
 
       <div className="content">
-        <span className="back-link" onClick={() => navigate('/')}>
+        <span className="back-link" onClick={() => navigate('/panel')}>
           ← Volver al dashboard
         </span>
 

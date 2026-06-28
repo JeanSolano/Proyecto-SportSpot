@@ -7,25 +7,28 @@ export default function Layout() {
 
   const handleLogout = () => {
     logout();
-    navigate('/login', { replace: true });
+    navigate('/', { replace: true });
   };
 
   return (
     <div className="shell">
       <aside className="sidebar">
-        <div className="sidebar-brand">
+        <div className="sidebar-brand" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
           <img src="/logo-official.png" alt="SportSpot" />
           <span>SportSpot</span>
         </div>
 
         <nav>
-          <NavLink to="/" end className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+          <NavLink to="/panel" end className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
             📊 Dashboard
           </NavLink>
           <NavLink
             to="/establecimientos/nuevo"
             className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
             ➕ Nuevo establecimiento
+          </NavLink>
+          <NavLink to="/suscripcion" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+            💳 Suscripción
           </NavLink>
         </nav>
 

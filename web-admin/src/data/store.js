@@ -10,6 +10,7 @@
 const OWNERS_KEY = 'sportspot_owners';
 const SESSION_KEY = 'sportspot_session';
 const ESTABLISHMENTS_KEY = 'sportspot_establishments';
+const SUBSCRIPTIONS_KEY = 'sportspot_subscriptions';
 
 const read = (key, fallback) => {
   try {
@@ -69,6 +70,39 @@ export function getCurrentOwner() {
 const publicOwner = ({ id, name, email, phone }) => ({ id, name, email, phone });
 
 // ---------------------------------------------------------------------------
+// Suscripción (modelo híbrido: plan + comisión). Mock con localStorage.
+// ---------------------------------------------------------------------------
+
+export async function getSubscription(ownerId) {
+  await delay(250);
+  return read(SUBSCRIPTIONS_KEY, {})[ownerId] ?? null;
+}
+
+/** Simula el cobro vía PayPal Sandbox y activa el plan. */
+export async function subscribe(ownerId, planId) {
+  await delay(900); // simula el redirect/confirmación de PayPal
+  const all = read(SUBSCRIPTIONS_KEY, {});
+  all[ownerId] = {
+    planId,
+    status: 'active',
+    startedAt: new Date().toISOString(),
+    renewsAt: new Date(Date.now() + 30 * 86400000).toISOString(),
+    provider: 'paypal-sandbox',
+  };
+  write(SUBSCRIPTIONS_KEY, all);
+  return all[ownerId];
+}
+
+export async function cancelSubscription(ownerId) {
+  await delay(300);
+  const all = read(SUBSCRIPTIONS_KEY, {});
+  if (all[ownerId]) {
+    all[ownerId] = { ...all[ownerId], status: 'cancelled' };
+    write(SUBSCRIPTIONS_KEY, all);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Establecimientos
 // ---------------------------------------------------------------------------
 
@@ -85,7 +119,7 @@ export async function getEstablishment(id) {
 export async function addEstablishment(data) {
   await delay();
   const all = read(ESTABLISHMENTS_KEY, []);
-  const record = { ...data, id: uid(), createdAt: new Date().toISOString() };
+  const record = { ...data, id: uid(), published: true, createdAt: new Date().toISOString() };
   all.push(record);
   write(ESTABLISHMENTS_KEY, all);
   return record;
