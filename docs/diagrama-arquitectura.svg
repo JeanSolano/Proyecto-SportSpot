@@ -104,11 +104,11 @@
   <text x="724" y="614" class="sublabel" fill="#5A5A72">🌐 APIs · SERVICIOS DE TERCEROS</text>
 
   <rect x="720" y="636" width="185" height="180" class="card"/>
-  <rect x="720" y="636" width="11" height="180" rx="5.5" fill="#FF6B00"/>
-  <text x="752" y="676" class="cat" fill="#FF6B00">PAGOS</text>
-  <text x="752" y="708" class="techsm">💳 Yappy</text>
-  <text x="752" y="738" class="pursm">+ pasarelas</text>
-  <text x="752" y="759" class="pursm">locales (Panamá).</text>
+  <rect x="720" y="636" width="11" height="180" rx="5.5" fill="#0070BA"/>
+  <text x="752" y="676" class="cat" fill="#0070BA">PAGOS</text>
+  <text x="752" y="708" class="techsm">💳 PayPal</text>
+  <text x="752" y="738" class="pursm">Sandbox para</text>
+  <text x="752" y="759" class="pursm">simulación.</text>
 
   <rect x="922" y="636" width="185" height="180" class="card"/>
   <rect x="922" y="636" width="11" height="180" rx="5.5" fill="#FFA000"/>
