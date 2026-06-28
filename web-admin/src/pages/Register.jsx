@@ -25,7 +25,10 @@ export default function Register() {
     setLoading(true);
     try {
       await register({ name: form.name, email: form.email, phone: form.phone, password: form.password });
-      navigate(from, { replace: true });
+      // Abre el panel en una pestaña nueva; si el navegador lo bloquea, navega aquí.
+      const win = window.open(from, '_blank', 'noopener');
+      if (win) navigate('/', { replace: true });
+      else navigate(from, { replace: true });
     } catch (err) {
       setError(err.message);
       setLoading(false);

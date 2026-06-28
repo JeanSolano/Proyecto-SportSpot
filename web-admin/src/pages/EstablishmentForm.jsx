@@ -36,6 +36,7 @@ export default function EstablishmentForm() {
     Promise.all([getSubscription(owner.id), getEstablishments(owner.id)]).then(([sub, list]) => {
       const plan = sub?.status === 'active' ? planById(sub.planId) : null;
       if (!plan) {
+        window.alert('Necesitas un plan activo para publicar establecimientos. Elige uno para continuar.');
         navigate('/planes', { replace: true });
         return;
       }

@@ -6,6 +6,9 @@ export default function PublicNav() {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
+  // Abre el panel en una pestaña nueva (separa el sitio público del panel).
+  const openPanel = () => window.open('/panel', '_blank', 'noopener');
+
   return (
     <header className="pnav">
       <Link to="/" className="pnav-brand">
@@ -15,14 +18,14 @@ export default function PublicNav() {
 
       <nav className="pnav-links">
         <a href="/#como-funciona">Cómo funciona</a>
+        <a href="/#nosotros">Quiénes somos</a>
         <Link to="/planes">Planes</Link>
-        <a href="/#nosotros">Nosotros</a>
-        <a href="/#contacto">Contacto</a>
+        <a href="/#contacto">Contáctanos</a>
       </nav>
 
       <div className="pnav-actions">
         {isAuthenticated ? (
-          <button className="btn btn-primary btn-sm" onClick={() => navigate('/panel')}>
+          <button className="btn btn-primary btn-sm" onClick={openPanel}>
             Ir a mi panel
           </button>
         ) : (

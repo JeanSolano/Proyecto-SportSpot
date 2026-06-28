@@ -26,7 +26,10 @@ export default function Dashboard() {
   const totalCourts = establishments.reduce((sum, e) => sum + e.courts.length, 0);
 
   const handleNew = () => {
-    if (!plan) return navigate('/planes');
+    if (!plan) {
+      window.alert('Necesitas un plan activo para publicar establecimientos. Elige uno para continuar.');
+      return navigate('/planes');
+    }
     if (atLimit) {
       window.alert(`Has alcanzado el límite de tu plan ${plan.name} (${plan.maxEstablishments}). Mejora tu plan para agregar más.`);
       return navigate('/suscripcion');

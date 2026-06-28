@@ -19,7 +19,10 @@ export default function Login() {
     setLoading(true);
     try {
       await login({ email, password });
-      navigate(from, { replace: true });
+      // Abre el panel en una pestaña nueva; si el navegador lo bloquea, navega aquí.
+      const win = window.open(from, '_blank', 'noopener');
+      if (win) navigate('/', { replace: true });
+      else navigate(from, { replace: true });
     } catch (err) {
       setError(err.message);
       setLoading(false);
