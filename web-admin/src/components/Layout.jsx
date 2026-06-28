@@ -1,5 +1,9 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, PlusCircle, CreditCard, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
+
+const initials = (name = '') =>
+  name.trim().split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase()).join('') || 'U';
 
 export default function Layout() {
   const { owner, logout } = useAuth();
@@ -10,6 +14,8 @@ export default function Layout() {
     navigate('/', { replace: true });
   };
 
+  const navClass = ({ isActive }) => `nav-item ${isActive ? 'active' : ''}`;
+
   return (
     <div className="shell">
       <aside className="sidebar">
@@ -19,27 +25,28 @@ export default function Layout() {
         </div>
 
         <nav>
-          <NavLink to="/panel" end className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-            📊 Dashboard
+          <NavLink to="/panel" end className={navClass}>
+            <LayoutDashboard className="lucide" /> Dashboard
           </NavLink>
-          <NavLink
-            to="/establecimientos/nuevo"
-            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-            ➕ Nuevo establecimiento
+          <NavLink to="/establecimientos/nuevo" className={navClass}>
+            <PlusCircle className="lucide" /> Nuevo establecimiento
           </NavLink>
-          <NavLink to="/suscripcion" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-            💳 Suscripción
+          <NavLink to="/suscripcion" className={navClass}>
+            <CreditCard className="lucide" /> Suscripción
           </NavLink>
         </nav>
 
         <div className="sidebar-footer">
           <div className="sidebar-owner">
-            👤 {owner?.name}
-            <br />
-            {owner?.email}
+            <span className="avatar">{initials(owner?.name)}</span>
+            <span>
+              {owner?.name}
+              <br />
+              {owner?.email}
+            </span>
           </div>
-          <button className="nav-item" onClick={handleLogout} style={{ width: '100%', textAlign: 'left' }}>
-            🚪 Cerrar sesión
+          <button className="nav-item" onClick={handleLogout} style={{ width: '100%' }}>
+            <LogOut className="lucide" /> Cerrar sesión
           </button>
         </div>
       </aside>

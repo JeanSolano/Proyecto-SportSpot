@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Plus, Building2, LayoutGrid, Coins, Rocket, CreditCard } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { getEstablishments, getSubscription } from '../data/store';
 import { planById } from '../data/plans';
@@ -25,14 +26,10 @@ export default function Dashboard() {
   const totalCourts = establishments.reduce((sum, e) => sum + e.courts.length, 0);
 
   const handleNew = () => {
-    if (!plan) {
-      navigate('/planes');
-      return;
-    }
+    if (!plan) return navigate('/planes');
     if (atLimit) {
       window.alert(`Has alcanzado el límite de tu plan ${plan.name} (${plan.maxEstablishments}). Mejora tu plan para agregar más.`);
-      navigate('/suscripcion');
-      return;
+      return navigate('/suscripcion');
     }
     navigate('/establecimientos/nuevo');
   };
@@ -44,27 +41,29 @@ export default function Dashboard() {
           <h2>Dashboard</h2>
           <span className="muted tiny">Hola, {owner.name} 👋</span>
         </div>
-        <button className="btn btn-primary" onClick={handleNew}>➕ Nuevo establecimiento</button>
+        <button className="btn btn-primary" onClick={handleNew}>
+          <Plus className="lucide" /> Nuevo establecimiento
+        </button>
       </div>
 
       <div className="content">
         {/* Estado de suscripción */}
         {!loading && !plan && (
-          <div className="card card-pad sub-banner">
-            <div>
-              <h3>Elige un plan para publicar 🚀</h3>
+          <div className="card sub-banner">
+            <span className="icon-badge orange"><Rocket className="lucide" /></span>
+            <div className="sub-banner-text">
+              <h3>Elige un plan para publicar</h3>
               <p className="muted">Necesitas una suscripción activa para registrar y publicar tus establecimientos.</p>
             </div>
             <button className="btn btn-primary" onClick={() => navigate('/planes')}>Ver planes</button>
           </div>
         )}
         {!loading && plan && (
-          <div className="card card-pad sub-banner" style={{ borderLeft: `4px solid ${plan.accent}` }}>
-            <div>
-              <h3>Plan {plan.name} · <span style={{ color: 'var(--primary)' }}>activo</span></h3>
-              <p className="muted">
-                {establishments.length} de {plan.maxEstablishments} establecimientos · {plan.commission}% de comisión por reserva
-              </p>
+          <div className="card sub-banner" style={{ boxShadow: 'var(--shadow-sm)', borderLeft: `4px solid ${plan.accent}` }}>
+            <span className="icon-badge green"><CreditCard className="lucide" /></span>
+            <div className="sub-banner-text">
+              <h3>Plan {plan.name} · <span style={{ color: 'var(--primary-dark)' }}>activo</span></h3>
+              <p className="muted">{establishments.length} de {plan.maxEstablishments} establecimientos · {plan.commission}% de comisión por reserva</p>
             </div>
             <button className="btn btn-outline btn-sm" onClick={() => navigate('/suscripcion')}>Gestionar</button>
           </div>
@@ -72,16 +71,25 @@ export default function Dashboard() {
 
         <div className="stat-grid">
           <div className="card stat-card">
-            <div className="stat-value">{establishments.length}</div>
-            <div className="stat-label">Establecimientos</div>
+            <span className="icon-badge blue"><Building2 className="lucide" /></span>
+            <div>
+              <div className="stat-value">{establishments.length}</div>
+              <div className="stat-label">Establecimientos</div>
+            </div>
           </div>
           <div className="card stat-card">
-            <div className="stat-value">{totalCourts}</div>
-            <div className="stat-label">Canchas registradas</div>
+            <span className="icon-badge green"><LayoutGrid className="lucide" /></span>
+            <div>
+              <div className="stat-value">{totalCourts}</div>
+              <div className="stat-label">Canchas registradas</div>
+            </div>
           </div>
           <div className="card stat-card">
-            <div className="stat-value">{plan ? `${plan.commission}%` : '—'}</div>
-            <div className="stat-label">Comisión por reserva</div>
+            <span className="icon-badge orange"><Coins className="lucide" /></span>
+            <div>
+              <div className="stat-value">{plan ? `${plan.commission}%` : '—'}</div>
+              <div className="stat-label">Comisión por reserva</div>
+            </div>
           </div>
         </div>
 
@@ -95,13 +103,13 @@ export default function Dashboard() {
           </div>
         ) : establishments.length === 0 ? (
           <div className="card card-pad empty-state">
-            <span className="emoji">🏟️</span>
+            <span className="icon-badge navy"><Building2 className="lucide" /></span>
             <h3>Aún no tienes establecimientos</h3>
             <p className="muted" style={{ margin: '8px 0 20px' }}>
               {plan ? 'Registra tu primer establecimiento para empezar a recibir reservas.' : 'Elige un plan para empezar a publicar.'}
             </p>
             <button className="btn btn-primary" onClick={handleNew}>
-              {plan ? '➕ Registrar establecimiento' : '💳 Ver planes'}
+              {plan ? <><Plus className="lucide" /> Registrar establecimiento</> : <><CreditCard className="lucide" /> Ver planes</>}
             </button>
           </div>
         ) : (
@@ -121,7 +129,8 @@ export default function Dashboard() {
                   })}
                 </div>
                 <div className="estab-amenities">
-                  🏟️ {e.courts.length} {e.courts.length === 1 ? 'cancha' : 'canchas'}
+                  <Building2 className="lucide" style={{ width: 15, height: 15 }} />
+                  {e.courts.length} {e.courts.length === 1 ? 'cancha' : 'canchas'}
                   {e.amenities.slice(0, 3).map((a) => {
                     const am = amenity(a);
                     return am ? <span key={a}>· {am.emoji} {am.label}</span> : null;

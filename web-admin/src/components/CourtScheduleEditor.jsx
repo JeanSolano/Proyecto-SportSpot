@@ -1,3 +1,4 @@
+import { X } from 'lucide-react';
 import { COURT_TYPES, TIME_SLOTS, WEEK_DAYS } from '../data/constants';
 
 /**
@@ -26,7 +27,7 @@ export default function CourtScheduleEditor({ index, court, onChange, onRemove }
       <div className="court-head">
         <span className="court-num">Cancha #{index + 1}</span>
         <button type="button" className="btn btn-ghost btn-sm" onClick={onRemove} style={{ color: 'var(--danger)' }}>
-          ✕ Quitar
+          <X className="lucide" /> Quitar
         </button>
       </div>
 

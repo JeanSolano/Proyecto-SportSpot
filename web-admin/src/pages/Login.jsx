@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Mail, Lock, Building2, CalendarClock, BarChart3, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 
 export default function Login() {
@@ -32,9 +33,9 @@ export default function Login() {
         <h1>Panel de Establecimientos</h1>
         <p>Gestiona tus canchas, horarios y reservas desde un solo lugar. Bienvenido de vuelta.</p>
         <ul>
-          <li>🏟️ Registra tus establecimientos y canchas</li>
-          <li>🗓️ Define horarios individuales por cancha</li>
-          <li>📊 Controla disponibilidad y servicios</li>
+          <li><Building2 className="lucide" /> Registra tus establecimientos y canchas</li>
+          <li><CalendarClock className="lucide" /> Define horarios individuales por cancha</li>
+          <li><BarChart3 className="lucide" /> Controla disponibilidad y servicios</li>
         </ul>
       </div>
 
@@ -43,32 +44,40 @@ export default function Login() {
           <h2>Iniciar sesión</h2>
           <p className="muted">Accede a tu panel de administración.</p>
 
-          {error && <div className="banner-error">{error}</div>}
+          {error && <div className="banner-error"><AlertCircle className="lucide" /> {error}</div>}
 
           <form onSubmit={submit}>
             <div className="field">
               <label>Correo electrónico</label>
-              <input
-                className="input"
-                type="email"
-                placeholder="dueno@establecimiento.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+              <div className="input-icon">
+                <Mail className="lucide" />
+                <input
+                  className="input"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="dueno@establecimiento.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
             </div>
             <div className="field">
               <label>Contraseña</label>
-              <input
-                className="input"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+              <div className="input-icon">
+                <Lock className="lucide" />
+                <input
+                  className="input"
+                  type="password"
+                  autoComplete="current-password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
             </div>
-            <button className="btn btn-primary btn-block" disabled={loading || !email || !password}>
+            <button className="btn btn-primary btn-block btn-lg" disabled={loading || !email || !password}>
               {loading ? <span className="spinner" /> : 'Entrar al panel'}
             </button>
           </form>

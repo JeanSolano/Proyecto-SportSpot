@@ -1,86 +1,130 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  MapPin, CalendarClock, MessagesSquare, BarChart3,
+  UserPlus, CreditCard, Building2, Smartphone,
+  Mail, Phone, Clock, CheckCircle2, ArrowRight, Sparkles,
+} from 'lucide-react';
 import PublicNav from '../components/PublicNav.jsx';
 import PublicFooter from '../components/PublicFooter.jsx';
+import useScrollReveal from '../hooks/useScrollReveal';
 import { PLANS } from '../data/plans';
+import { VENUE_PHOTOS } from '../data/media';
 
 const SPORTS = ['⚽ Fútbol', '🏀 Basketball', '⚾ Baseball', '🎾 Pádel', '🎾 Tenis', '🏐 Voleibol'];
 
 const STEPS = [
-  { n: 1, emoji: '📝', title: 'Crea tu cuenta', text: 'Regístrate como dueño en menos de un minuto.' },
-  { n: 2, emoji: '💳', title: 'Elige tu plan', text: 'Suscripción según la cantidad de establecimientos.' },
-  { n: 3, emoji: '🏟️', title: 'Publica tus canchas', text: 'Configura canchas, horarios y servicios.' },
-  { n: 4, emoji: '📲', title: 'Recibe reservas', text: 'Los deportistas reservan desde la app móvil.' },
+  { n: 1, Icon: UserPlus, title: 'Crea tu cuenta', text: 'Regístrate como dueño en menos de un minuto.' },
+  { n: 2, Icon: CreditCard, title: 'Elige tu plan', text: 'Suscripción según la cantidad de establecimientos.' },
+  { n: 3, Icon: Building2, title: 'Publica tus canchas', text: 'Configura canchas, horarios y servicios.' },
+  { n: 4, Icon: Smartphone, title: 'Recibe reservas', text: 'Los deportistas reservan desde la app móvil.' },
 ];
 
 const FEATURES = [
-  { emoji: '🗺️', title: 'Visibilidad real', text: 'Tu establecimiento aparece en el mapa y el feed de la app.' },
-  { emoji: '🗓️', title: 'Horarios por cancha', text: 'Define disponibilidad individual para cada cancha.' },
-  { emoji: '💬', title: 'Comunidad deportiva', text: 'Publicaciones, promociones y reseñas de tus clientes.' },
-  { emoji: '📊', title: 'Control total', text: 'Gestiona reservas y disponibilidad desde web y móvil.' },
+  { Icon: MapPin, color: 'green', title: 'Visibilidad real', text: 'Tu establecimiento aparece en el mapa y el feed de la app.' },
+  { Icon: CalendarClock, color: 'blue', title: 'Horarios por cancha', text: 'Define disponibilidad individual para cada cancha.' },
+  { Icon: MessagesSquare, color: 'orange', title: 'Comunidad deportiva', text: 'Publicaciones, promociones y reseñas de tus clientes.' },
+  { Icon: BarChart3, color: 'navy', title: 'Control total', text: 'Gestiona reservas y disponibilidad desde web y móvil.' },
 ];
 
 export default function Landing() {
   const navigate = useNavigate();
   const [sent, setSent] = useState(false);
-
-  const submitContact = (e) => {
-    e.preventDefault();
-    setSent(true);
-  };
+  useScrollReveal();
 
   return (
     <div className="public">
       <PublicNav />
 
-      {/* HERO */}
-      <section className="hero">
-        <div className="hero-content">
-          <span className="hero-badge">🇵🇦 Hecho para Panamá</span>
-          <h1>Llena tus canchas. Haz crecer tu negocio deportivo.</h1>
-          <p>
-            SportSpot conecta tus canchas con miles de deportistas. Publica tus establecimientos,
-            gestiona reservas y cobra en línea — todo desde un solo lugar.
-          </p>
-          <div className="hero-cta">
-            <button className="btn btn-primary" onClick={() => navigate('/planes')}>
-              Registra tu establecimiento
-            </button>
-            <button className="btn btn-outline btn-light" onClick={() => navigate('/login')}>
-              Ya tengo cuenta
-            </button>
+      {/* HERO — Aurora + collage de fotos */}
+      <section className="hero aurora">
+        <div className="aurora-bg" aria-hidden="true" />
+        <div className="hero-grid">
+          <div className="hero-content">
+            <span className="hero-badge glass"><Sparkles className="lucide" /> Hecho para Panamá 🇵🇦</span>
+            <h1>Llena tus canchas. Haz crecer tu negocio deportivo.</h1>
+            <p>
+              SportSpot conecta tus canchas con miles de deportistas. Publica tus establecimientos,
+              gestiona reservas y cobra en línea — todo desde un solo lugar.
+            </p>
+            <div className="hero-cta">
+              <button className="btn btn-primary btn-lg" onClick={() => navigate('/planes')}>
+                Registra tu establecimiento <ArrowRight className="lucide" />
+              </button>
+              <button className="btn btn-light btn-lg" onClick={() => navigate('/login')}>
+                Ya tengo cuenta
+              </button>
+            </div>
+            <div className="hero-sports">
+              {SPORTS.map((s) => (
+                <span key={s} className="hero-sport">{s}</span>
+              ))}
+            </div>
           </div>
-          <div className="hero-sports">
-            {SPORTS.map((s) => (
-              <span key={s} className="hero-sport">{s}</span>
-            ))}
+
+          <div className="hero-visual">
+            <div className="hv-card hv-1">
+              <img src={VENUE_PHOTOS[1].url} alt="Cancha de fútbol" />
+            </div>
+            <div className="hv-card hv-2">
+              <img src={VENUE_PHOTOS[0].url} alt="Cancha de basketball" loading="lazy" />
+            </div>
+            <div className="hv-badge glass">
+              <strong>+500</strong>
+              <span>canchas listas para reservar</span>
+            </div>
           </div>
         </div>
       </section>
 
+      {/* TRUST / social proof */}
+      <div className="trust">
+        <div><strong>+500</strong><span>canchas potenciales</span></div>
+        <div><strong>+5</strong><span>deportes</span></div>
+        <div><strong>24/7</strong><span>reservas en línea</span></div>
+        <div><strong>4.8★</strong><span>satisfacción</span></div>
+      </div>
+
       {/* CÓMO FUNCIONA */}
       <section id="como-funciona" className="section">
-        <h2 className="section-title">¿Cómo funciona?</h2>
-        <p className="section-sub">De tu cancha a la app en cuatro pasos.</p>
+        <h2 className="section-title reveal">¿Cómo funciona?</h2>
+        <p className="section-sub reveal">De tu cancha a la app en cuatro pasos.</p>
         <div className="steps">
-          {STEPS.map((s) => (
-            <div key={s.n} className="step-card">
-              <div className="step-num">{s.emoji}</div>
-              <h3>{s.n}. {s.title}</h3>
+          {STEPS.map((s, i) => (
+            <div key={s.n} className="step-card reveal" style={{ '--d': `${i * 0.08}s` }}>
+              <span className="step-no">{s.n}</span>
+              <div className="icon-badge blue"><s.Icon className="lucide" /></div>
+              <h3>{s.title}</h3>
               <p>{s.text}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* FEATURES */}
+      {/* GALERÍA de canchas (fotos reales) */}
       <section className="section section-tint">
-        <h2 className="section-title">¿Por qué SportSpot?</h2>
-        <p className="section-sub">Todo lo que necesitas para administrar tu establecimiento.</p>
+        <h2 className="section-title reveal">Canchas que brillan en SportSpot</h2>
+        <p className="section-sub reveal">Así lucen los establecimientos publicados en la app.</p>
+        <div className="gallery">
+          {VENUE_PHOTOS.map((p, i) => (
+            <div key={p.label} className="gallery-item reveal" style={{ '--d': `${i * 0.08}s` }}>
+              <img src={p.url} alt={`Cancha de ${p.label}`} loading="lazy" />
+              <div className="g-overlay">
+                <span className="g-label">{p.emoji} {p.label}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* FEATURES */}
+      <section className="section">
+        <h2 className="section-title reveal">¿Por qué SportSpot?</h2>
+        <p className="section-sub reveal">Todo lo que necesitas para administrar tu establecimiento.</p>
         <div className="features">
-          {FEATURES.map((f) => (
-            <div key={f.title} className="feature-card">
-              <div className="feature-emoji">{f.emoji}</div>
+          {FEATURES.map((f, i) => (
+            <div key={f.title} className="feature-card reveal" style={{ '--d': `${i * 0.08}s` }}>
+              <div className={`icon-badge ${f.color}`}><f.Icon className="lucide" /></div>
               <h3>{f.title}</h3>
               <p>{f.text}</p>
             </div>
@@ -89,33 +133,35 @@ export default function Landing() {
       </section>
 
       {/* PLANES (preview) */}
-      <section id="planes" className="section">
-        <h2 className="section-title">Planes para cada negocio</h2>
-        <p className="section-sub">Suscripción mensual + una pequeña comisión por reserva.</p>
+      <section id="planes" className="section section-tint">
+        <h2 className="section-title reveal">Planes para cada negocio</h2>
+        <p className="section-sub reveal">Suscripción mensual + una pequeña comisión por reserva.</p>
         <div className="plans plans-compact">
-          {PLANS.map((p) => (
-            <div key={p.id} className={`plan-card ${p.popular ? 'popular' : ''}`}>
+          {PLANS.map((p, i) => (
+            <div key={p.id} className={`plan-card reveal ${p.popular ? 'popular' : ''}`} style={{ '--d': `${i * 0.08}s` }}>
               {p.popular && <span className="plan-tag">Más popular</span>}
               <h3 style={{ color: p.accent }}>{p.name}</h3>
-              <div className="plan-price">
+              <div className="plan-price tnum">
                 ${p.price}<span>/mes</span>
               </div>
               <p className="plan-tagline">{p.tagline}</p>
-              <p className="plan-limit">Hasta {p.maxEstablishments} establecimiento{p.maxEstablishments > 1 ? 's' : ''} · {p.commission}% por reserva</p>
+              <p className="plan-limit">
+                Hasta {p.maxEstablishments} establecimiento{p.maxEstablishments > 1 ? 's' : ''} · {p.commission}% por reserva
+              </p>
             </div>
           ))}
         </div>
-        <div style={{ textAlign: 'center', marginTop: 28 }}>
-          <button className="btn btn-primary" onClick={() => navigate('/planes')}>
-            Ver planes y empezar
+        <div style={{ textAlign: 'center', marginTop: 30 }}>
+          <button className="btn btn-primary btn-lg" onClick={() => navigate('/planes')}>
+            Ver planes y empezar <ArrowRight className="lucide" />
           </button>
         </div>
       </section>
 
       {/* NOSOTROS */}
-      <section id="nosotros" className="section section-tint">
+      <section id="nosotros" className="section">
         <div className="about">
-          <div>
+          <div className="reveal">
             <h2 className="section-title" style={{ textAlign: 'left' }}>Quiénes somos</h2>
             <p>
               SportSpot nació para resolver un problema simple: encontrar y reservar una cancha en
@@ -127,7 +173,7 @@ export default function Landing() {
               su lugar y profesionalizar la gestión de reservas y pagos.
             </p>
           </div>
-          <div className="about-stats">
+          <div className="about-stats reveal" style={{ '--d': '0.1s' }}>
             <div><strong>+5</strong><span>deportes</span></div>
             <div><strong>24/7</strong><span>reservas</span></div>
             <div><strong>100%</strong><span>en línea</span></div>
@@ -136,20 +182,21 @@ export default function Landing() {
       </section>
 
       {/* CONTACTO / ATENCIÓN AL CLIENTE */}
-      <section id="contacto" className="section">
-        <h2 className="section-title">Atención al cliente</h2>
-        <p className="section-sub">¿Dudas para publicar tu establecimiento? Escríbenos.</p>
+      <section id="contacto" className="section section-tint">
+        <h2 className="section-title reveal">Atención al cliente</h2>
+        <p className="section-sub reveal">¿Dudas para publicar tu establecimiento? Escríbenos.</p>
         <div className="contact">
-          <div className="contact-info">
-            <div><span className="contact-ic">📧</span> soporte@sportspot.com</div>
-            <div><span className="contact-ic">📱</span> +507 6000-0000</div>
-            <div><span className="contact-ic">📍</span> Ciudad de Panamá, Panamá</div>
-            <div><span className="contact-ic">🕐</span> Lun a Sáb · 8:00 – 18:00</div>
+          <div className="contact-info reveal">
+            <div><span className="icon-badge blue"><Mail className="lucide" /></span> soporte@sportspot.com</div>
+            <div><span className="icon-badge green"><Phone className="lucide" /></span> +507 6000-0000</div>
+            <div><span className="icon-badge orange"><MapPin className="lucide" /></span> Ciudad de Panamá, Panamá</div>
+            <div><span className="icon-badge navy"><Clock className="lucide" /></span> Lun a Sáb · 8:00 – 18:00</div>
           </div>
-          <form className="contact-form card card-pad" onSubmit={submitContact}>
+          <form className="contact-form card card-pad reveal" style={{ '--d': '0.1s' }} onSubmit={(e) => { e.preventDefault(); setSent(true); }}>
             {sent ? (
               <div className="contact-ok">
-                ✅ ¡Gracias! Te contactaremos pronto.
+                <CheckCircle2 className="lucide" style={{ color: 'var(--primary)' }} />
+                ¡Gracias! Te contactaremos pronto.
               </div>
             ) : (
               <>
@@ -169,6 +216,18 @@ export default function Landing() {
               </>
             )}
           </form>
+        </div>
+      </section>
+
+      {/* CTA final */}
+      <section className="cta-band">
+        <div className="aurora-bg" aria-hidden="true" />
+        <div className="cta-inner">
+          <h2>¿Listo para llenar tus canchas?</h2>
+          <p>Publica tu establecimiento hoy y empieza a recibir reservas desde la app.</p>
+          <button className="btn btn-primary btn-lg" onClick={() => navigate('/planes')}>
+            Empezar ahora <ArrowRight className="lucide" />
+          </button>
         </div>
       </section>
 

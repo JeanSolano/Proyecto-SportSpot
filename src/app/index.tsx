@@ -27,7 +27,7 @@ export const VENUES = [
     likes: 234,
     comments: 18,
     timeAgo: 'Hace 2h',
-    imageUrl: 'https://images.unsplash.com/photo-1546519638405-a9f64a6f4cae?w=800&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&q=80',
     coordinate: { latitude: 8.9936, longitude: -79.5498 },
   },
   {

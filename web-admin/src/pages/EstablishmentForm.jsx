@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, ClipboardList, Sparkles, LayoutGrid, Plus, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { addEstablishment, getEstablishment, getEstablishments, getSubscription, updateEstablishment } from '../data/store';
 import { planById } from '../data/plans';
@@ -117,15 +118,15 @@ export default function EstablishmentForm() {
 
       <div className="content">
         <span className="back-link" onClick={() => navigate(-1)}>
-          ← Volver
+          <ArrowLeft className="lucide" /> Volver
         </span>
 
-        {error && <div className="banner-error">{error}</div>}
+        {error && <div className="banner-error"><AlertCircle className="lucide" /> {error}</div>}
 
         <form onSubmit={submit}>
           {/* ---------------------------------------------- Datos generales */}
           <div className="card card-pad form-section">
-            <div className="form-section-title">📋 Datos del establecimiento</div>
+            <div className="form-section-title"><ClipboardList className="lucide" /> Datos del establecimiento</div>
             <div className="form-section-sub">Información general que verán los usuarios.</div>
 
             <div className="row">
@@ -157,7 +158,7 @@ export default function EstablishmentForm() {
 
           {/* ---------------------------------------------- Servicios */}
           <div className="card card-pad form-section">
-            <div className="form-section-title">🛎️ Servicios e instalaciones</div>
+            <div className="form-section-title"><Sparkles className="lucide" /> Servicios e instalaciones</div>
             <div className="form-section-sub">Marca todo lo que ofrece tu establecimiento.</div>
             <div className="checks">
               {AMENITIES.map((a) => (
@@ -171,7 +172,7 @@ export default function EstablishmentForm() {
           {/* ---------------------------------------------- Canchas */}
           <div className="card card-pad form-section">
             <div className="form-section-title">
-              🏟️ Canchas para reservar
+              <LayoutGrid className="lucide" /> Canchas para reservar
               <span className="badge" style={{ background: 'var(--navy)' }}>
                 {courts.length} {courts.length === 1 ? 'cancha' : 'canchas'}
               </span>
@@ -191,7 +192,7 @@ export default function EstablishmentForm() {
             ))}
 
             <button type="button" className="btn btn-outline btn-block" onClick={addCourt}>
-              ➕ Agregar otra cancha
+              <Plus className="lucide" /> Agregar otra cancha
             </button>
           </div>
 

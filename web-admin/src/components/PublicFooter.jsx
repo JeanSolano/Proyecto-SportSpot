@@ -5,8 +5,10 @@ export default function PublicFooter() {
     <footer className="pfooter">
       <div className="pfooter-inner">
         <div className="pfooter-brand">
-          <img src="/logo-official.png" alt="SportSpot" />
-          <span>SportSpot</span>
+          <div className="pfooter-logo">
+            <img src="/logo-official.png" alt="SportSpot" />
+            <span>SportSpot</span>
+          </div>
           <p>La red social deportiva de Panamá. Descubre, reserva y juega.</p>
         </div>
         <div className="pfooter-col">
