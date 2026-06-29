@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom';
 import { Check, Coins, ShieldCheck } from 'lucide-react';
 import PublicNav from '../components/PublicNav.jsx';
 import PublicFooter from '../components/PublicFooter.jsx';
@@ -6,13 +5,13 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { PLANS } from '../data/plans';
 
 export default function Plans() {
-  const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
 
+  // El portal de administrador (registro/checkout) se abre en pestaña aparte.
   const choose = (planId) => {
-    const target = `/checkout/${planId}`;
-    if (isAuthenticated) navigate(target);
-    else navigate('/register', { state: { from: target } });
+    const checkout = `/checkout/${planId}`;
+    const target = isAuthenticated ? checkout : `/register?next=${encodeURIComponent(checkout)}`;
+    window.open(target, '_blank', 'noopener');
   };
 
   return (

@@ -4,6 +4,7 @@ import {
   MapPin, CalendarClock, MessagesSquare, BarChart3,
   UserPlus, CreditCard, Building2, Smartphone,
   Mail, Phone, Clock, CheckCircle2, ArrowRight, Sparkles,
+  ShieldCheck, ExternalLink, LayoutGrid, Store,
 } from 'lucide-react';
 import PublicNav from '../components/PublicNav.jsx';
 import PublicFooter from '../components/PublicFooter.jsx';
@@ -32,6 +33,9 @@ export default function Landing() {
   const [sent, setSent] = useState(false);
   useScrollReveal();
 
+  // El portal de administrador se abre en una pestaña aparte del sitio público.
+  const openAdmin = (path) => window.open(path, '_blank', 'noopener');
+
   return (
     <div className="public">
       <PublicNav />
@@ -51,7 +55,7 @@ export default function Landing() {
               <button className="btn btn-primary btn-lg" onClick={() => navigate('/planes')}>
                 Registra tu establecimiento <ArrowRight className="lucide" />
               </button>
-              <button className="btn btn-light btn-lg" onClick={() => navigate('/login')}>
+              <button className="btn btn-light btn-lg" onClick={() => openAdmin('/login')}>
                 Ya tengo cuenta
               </button>
             </div>
@@ -129,6 +133,50 @@ export default function Landing() {
               <p>{f.text}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* PROMO: Portal de administrador (abre pestaña aparte) */}
+      <section className="admin-promo">
+        <div className="aurora-bg" aria-hidden="true" />
+        <div className="admin-promo-inner">
+          <div className="admin-promo-text reveal">
+            <span className="hero-badge glass"><ShieldCheck className="lucide" /> Portal de administradores</span>
+            <h2>¿Tienes un establecimiento? Conviértete en administrador</h2>
+            <p>
+              Accede al portal de administración —en una ventana aparte— para publicar tus canchas,
+              definir horarios, gestionar reservas y cobrar en línea.
+            </p>
+            <div className="admin-promo-cta">
+              <button className="btn btn-primary btn-lg" onClick={() => openAdmin('/register')}>
+                <Store className="lucide" /> Registrarme como administrador
+              </button>
+              <button className="btn btn-light btn-lg" onClick={() => openAdmin('/login')}>
+                Iniciar sesión
+              </button>
+            </div>
+            <p className="admin-promo-note">
+              <ExternalLink className="lucide" /> Se abre en una pestaña separada del sitio.
+            </p>
+          </div>
+
+          <div className="admin-promo-visual reveal" style={{ '--d': '0.1s' }}>
+            <div className="ap-card glass" role="img" aria-label="Vista previa del panel de administrador">
+              <div className="ap-card-head">
+                <img src="/logo-official.png" alt="" /> Panel · SportSpot
+              </div>
+              <div className="ap-kpis">
+                <div><Building2 className="lucide" /><strong>3</strong><span>Establecimientos</span></div>
+                <div><LayoutGrid className="lucide" /><strong>12</strong><span>Canchas</span></div>
+                <div><CalendarClock className="lucide" /><strong>48</strong><span>Reservas hoy</span></div>
+              </div>
+              <div className="ap-bars" aria-hidden="true">
+                {[38, 56, 44, 72, 50, 84, 66].map((h, i) => (
+                  <i key={i} style={{ height: `${h}%` }} />
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

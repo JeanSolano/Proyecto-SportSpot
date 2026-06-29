@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { User, Mail, Phone, Lock, Trophy, Clock, Bell, AlertCircle, Check } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 
@@ -7,7 +7,8 @@ export default function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from || '/panel';
+  const [params] = useSearchParams();
+  const from = location.state?.from || params.get('next') || '/panel';
   const [form, setForm] = useState({ name: '', email: '', phone: '', password: '', confirm: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -25,10 +26,7 @@ export default function Register() {
     setLoading(true);
     try {
       await register({ name: form.name, email: form.email, phone: form.phone, password: form.password });
-      // Abre el panel en una pestaña nueva; si el navegador lo bloquea, navega aquí.
-      const win = window.open(from, '_blank', 'noopener');
-      if (win) navigate('/', { replace: true });
-      else navigate(from, { replace: true });
+      navigate(from, { replace: true });
     } catch (err) {
       setError(err.message);
       setLoading(false);

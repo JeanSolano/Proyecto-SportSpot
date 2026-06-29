@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Mail, Lock, Building2, CalendarClock, BarChart3, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 
@@ -7,7 +7,8 @@ export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from || '/panel';
+  const [params] = useSearchParams();
+  const from = location.state?.from || params.get('next') || '/panel';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -19,10 +20,7 @@ export default function Login() {
     setLoading(true);
     try {
       await login({ email, password });
-      // Abre el panel en una pestaña nueva; si el navegador lo bloquea, navega aquí.
-      const win = window.open(from, '_blank', 'noopener');
-      if (win) navigate('/', { replace: true });
-      else navigate(from, { replace: true });
+      navigate(from, { replace: true });
     } catch (err) {
       setError(err.message);
       setLoading(false);

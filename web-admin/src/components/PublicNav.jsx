@@ -6,8 +6,8 @@ export default function PublicNav() {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  // Abre el panel en una pestaña nueva (separa el sitio público del panel).
-  const openPanel = () => window.open('/panel', '_blank', 'noopener');
+  // El portal de administrador vive en una pestaña aparte del sitio público.
+  const openAdmin = (path) => window.open(path, '_blank', 'noopener');
 
   return (
     <header className="pnav">
@@ -25,12 +25,12 @@ export default function PublicNav() {
 
       <div className="pnav-actions">
         {isAuthenticated ? (
-          <button className="btn btn-primary btn-sm" onClick={openPanel}>
+          <button className="btn btn-primary btn-sm" onClick={() => openAdmin('/panel')}>
             Ir a mi panel
           </button>
         ) : (
           <>
-            <button className="btn btn-ghost btn-sm" onClick={() => navigate('/login')}>
+            <button className="btn btn-ghost btn-sm" onClick={() => openAdmin('/login')}>
               <LogIn className="lucide" /> Iniciar sesión
             </button>
             <button className="btn btn-primary btn-sm" onClick={() => navigate('/planes')}>
