@@ -1,0 +1,14 @@
+{
+  "//": "Config mínima para que Vite no herede el tsconfig de Expo de la raíz (que requiere node_modules de la app móvil). El proyecto web es JavaScript.",
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "checkJs": false,
+    "noEmit": true,
+    "skipLibCheck": true
+  },
+  "include": ["src"]
+}

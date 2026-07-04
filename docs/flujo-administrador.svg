@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1660" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="9" refY="4" orient="auto">
+      <path d="M0,0 L9,4 L0,8 Z" fill="#1A1A2E"/>
+    </marker>
+    <filter id="sh" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#1B2880" flood-opacity="0.15"/>
+    </filter>
+    <style>
+      .box  { fill:#FFFFFF; stroke:#1B2880; stroke-width:2.5; rx:12; filter:url(#sh); }
+      .t    { fill:#1A1A2E; font-size:17px; font-weight:700; text-anchor:middle; }
+      .ts   { fill:#1A1A2E; font-size:15px; font-weight:700; text-anchor:middle; }
+      .sub  { fill:#5A5A72; font-size:12.5px; text-anchor:middle; }
+      .dec  { fill:#FFF7E6; stroke:#F59E00; stroke-width:2.5; }
+      .dect { fill:#7A5200; font-size:14px; font-weight:700; text-anchor:middle; }
+      .edge { stroke:#1A1A2E; stroke-width:2.5; fill:none; }
+      .lbl  { fill:#1A1A2E; font-size:13px; font-weight:700; text-anchor:middle; }
+      .item { fill:#1A1A2E; font-size:13.5px; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="1660" fill="#F7F8FC"/>
+  <text x="600" y="50" text-anchor="middle" font-size="28" font-weight="700" fill="#1B2880">Flujo del Administrador (Dueño de Establecimiento)</text>
+
+  <!-- ===================== FLECHAS (detrás) ===================== -->
+  <path class="edge" d="M600,160 L600,190" marker-end="url(#arrow)"/>
+  <path class="edge" d="M480,250 L300,358" marker-end="url(#arrow)"/>
+  <path class="edge" d="M720,250 L900,358" marker-end="url(#arrow)"/>
+  <path class="edge" d="M300,424 L520,468" marker-end="url(#arrow)"/>
+  <path class="edge" d="M900,424 L680,468" marker-end="url(#arrow)"/>
+  <path class="edge" d="M600,540 L600,588" marker-end="url(#arrow)"/>
+  <path class="edge" d="M600,672 L600,706" marker-end="url(#arrow)"/>
+  <path class="edge" d="M600,774 L600,786" marker-end="url(#arrow)"/>
+  <!-- dec2 -> mejorar plan (No) y loop de regreso -->
+  <path class="edge" d="M730,852 L848,852" marker-end="url(#arrow)"/>
+  <path class="edge" d="M1090,852 L1150,852 L1150,631 L822,631" marker-end="url(#arrow)"/>
+  <!-- dec2 -> registrar (Sí) -->
+  <path class="edge" d="M600,916 L600,946" marker-end="url(#arrow)"/>
+  <path class="edge" d="M600,1012 L600,1046" marker-end="url(#arrow)"/>
+  <path class="edge" d="M600,1112 L600,1146" marker-end="url(#arrow)"/>
+  <!-- publicar -> columnas -->
+  <path class="edge" d="M600,1222 L330,1266" marker-end="url(#arrow)"/>
+  <path class="edge" d="M600,1222 L870,1266" marker-end="url(#arrow)"/>
+  <!-- app movil -> nota comisión -->
+  <path class="edge" stroke-dasharray="7 5" d="M870,1508 L640,1544" marker-end="url(#arrow)"/>
+
+  <!-- ===================== NODOS ===================== -->
+  <!-- Landing -->
+  <rect x="380" y="80" width="440" height="80" class="box"/>
+  <text x="600" y="116" class="t">🌐 Landing pública</text>
+  <text x="600" y="140" class="sub">Descubrimiento · Quiénes somos · Contacto · Atención al cliente</text>
+
+  <!-- Decisión 1 -->
+  <polygon class="dec" points="600,192 720,250 600,308 480,250"/>
+  <text x="600" y="245" class="dect">¿Ya tienes</text>
+  <text x="600" y="263" class="dect">cuenta?</text>
+  <text x="378" y="300" class="lbl">No</text>
+  <text x="824" y="300" class="lbl">Sí</text>
+
+  <!-- Registro / Login -->
+  <rect x="170" y="360" width="260" height="64" class="box"/>
+  <text x="300" y="398" class="ts">📝 Registro de dueño</text>
+
+  <rect x="770" y="360" width="260" height="64" class="box"/>
+  <text x="900" y="398" class="ts">🔓 Iniciar sesión</text>
+
+  <!-- Panel admin -->
+  <rect x="400" y="468" width="400" height="72" class="box" stroke="#E0234E"/>
+  <text x="600" y="504" class="t">🖥️ Panel de administrador (web)</text>
+  <text x="600" y="526" class="sub">Acceso del dueño tras autenticarse (JWT + Roles)</text>
+
+  <!-- Elegir plan -->
+  <rect x="380" y="588" width="440" height="84" class="box" stroke="#F4511E"/>
+  <text x="600" y="622" class="t">💳 Elegir plan de suscripción</text>
+  <text x="600" y="645" class="sub">Básico (1) · Pro (hasta 3) · Premium (hasta 10) establecimientos</text>
+  <text x="600" y="663" class="sub">El plan define cuántos establecimientos se pueden publicar</text>
+
+  <!-- Pasarela -->
+  <rect x="420" y="706" width="360" height="68" class="box" stroke="#0070BA"/>
+  <text x="600" y="738" class="t">🔐 Pasarela de pago · PayPal</text>
+  <text x="600" y="759" class="sub">Cobro de la suscripción · PayPal Sandbox (simulación)</text>
+
+  <!-- Decisión 2 -->
+  <polygon class="dec" points="600,788 730,852 600,916 470,852"/>
+  <text x="600" y="847" class="dect">¿Dentro del</text>
+  <text x="600" y="865" class="dect">límite del plan?</text>
+  <text x="660" y="838" class="lbl">No</text>
+  <text x="624" y="940" class="lbl">Sí</text>
+
+  <!-- Mejorar plan -->
+  <rect x="848" y="820" width="242" height="64" class="box" stroke="#F4511E"/>
+  <text x="969" y="852" class="ts">⬆️ Mejorar plan</text>
+  <text x="969" y="872" class="sub">Sube de plan y reintenta</text>
+
+  <!-- Registrar establecimiento -->
+  <rect x="400" y="946" width="400" height="66" class="box"/>
+  <text x="600" y="985" class="t">🏟️ Registrar establecimiento</text>
+
+  <!-- Configurar canchas -->
+  <rect x="400" y="1046" width="400" height="66" class="box"/>
+  <text x="600" y="1085" class="t">🗓️ Configurar canchas y horarios</text>
+
+  <!-- Publicar -->
+  <rect x="390" y="1146" width="420" height="76" class="box" fill="#EDF6E6" stroke="#56B330"/>
+  <text x="600" y="1182" class="t">✅ Publicar establecimiento</text>
+  <text x="600" y="1205" class="sub">Queda EN VIVO y visible para los deportistas</text>
+
+  <!-- ===================== Operación continua ===================== -->
+  <!-- Columna WEB -->
+  <rect x="110" y="1266" width="440" height="242" rx="16" fill="#EAF2FC" stroke="#1E7FE0" stroke-width="2.5"/>
+  <text x="330" y="1300" class="t" fill="#1E7FE0">🖥️ WEB · Fuente de la verdad</text>
+  <line x1="140" y1="1316" x2="520" y2="1316" stroke="#C9D9F0"/>
+  <text x="150" y="1348" class="item">✏️  Crear y editar establecimiento</text>
+  <text x="150" y="1384" class="item">🏟️  Crear y editar canchas y horarios</text>
+  <text x="150" y="1420" class="item">📣  Crear publicaciones y promos</text>
+  <text x="150" y="1456" class="item">💳  Facturación y suscripción</text>
+  <text x="150" y="1492" class="item">📊  Métricas y reportes</text>
+
+  <!-- Columna MÓVIL -->
+  <rect x="650" y="1266" width="440" height="242" rx="16" fill="#EEF6E8" stroke="#56B330" stroke-width="2.5"/>
+  <text x="870" y="1300" class="t" fill="#3E8A1F">📱 APP MÓVIL · Operación</text>
+  <line x1="680" y1="1316" x2="1060" y2="1316" stroke="#CFE6BF"/>
+  <text x="690" y="1352" class="item">📣  Editar publicaciones del feed (solo edición)</text>
+  <text x="690" y="1390" class="item">🔒  Bloquear / desbloquear horarios</text>
+  <text x="690" y="1428" class="item">✅  Confirmar / cancelar reservas</text>
+  <text x="690" y="1466" class="item">💬  Mensajes y reservas del día</text>
+
+  <!-- Nota comisión -->
+  <rect x="110" y="1544" width="980" height="78" rx="14" fill="#FFF4EE" stroke="#F4511E" stroke-width="2.5" stroke-dasharray="8 6"/>
+  <text x="600" y="1577" class="ts" fill="#F4511E">💰 Comisión por reserva (modelo híbrido)</text>
+  <text x="600" y="1602" class="sub">Cuando el deportista reserva y paga en la app se cobra un % · Requiere integrar el pago de reservas (la suscripción puede lanzarse antes)</text>
+</svg>
