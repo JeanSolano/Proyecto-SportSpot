@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CreditCard, Building2, Coins, CalendarClock, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
+import StatCard from '../components/StatCard.jsx';
 import { getEstablishments, getSubscription } from '../data/store';
 import { planById } from '../data/plans';
 
@@ -55,27 +56,9 @@ export default function Subscription() {
             </div>
 
             <div className="stat-grid" style={{ marginTop: 20 }}>
-              <div className="card stat-card">
-                <span className="icon-badge blue"><Building2 className="lucide" /></span>
-                <div>
-                  <div className="stat-value tnum">{count}/{plan.maxEstablishments}</div>
-                  <div className="stat-label">Establecimientos usados</div>
-                </div>
-              </div>
-              <div className="card stat-card">
-                <span className="icon-badge orange"><Coins className="lucide" /></span>
-                <div>
-                  <div className="stat-value">{plan.commission}%</div>
-                  <div className="stat-label">Comisión por reserva</div>
-                </div>
-              </div>
-              <div className="card stat-card">
-                <span className="icon-badge navy"><CalendarClock className="lucide" /></span>
-                <div>
-                  <div className="stat-value" style={{ fontSize: 17 }}>{fmtDate(sub.renewsAt)}</div>
-                  <div className="stat-label">Próxima renovación</div>
-                </div>
-              </div>
+              <StatCard icon={Building2} color="blue" tnum value={`${count}/${plan.maxEstablishments}`} label="Establecimientos usados" />
+              <StatCard icon={Coins} color="orange" value={`${plan.commission}%`} label="Comisión por reserva" />
+              <StatCard icon={CalendarClock} color="navy" valueStyle={{ fontSize: 17 }} value={fmtDate(sub.renewsAt)} label="Próxima renovación" />
             </div>
 
             <div className="card card-pad" style={{ marginTop: 20 }}>

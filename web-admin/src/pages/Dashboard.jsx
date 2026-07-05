@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Building2, LayoutGrid, Coins, Rocket, CreditCard } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
+import StatCard from '../components/StatCard.jsx';
 import { getEstablishments, getSubscription } from '../data/store';
 import { planById } from '../data/plans';
 import { amenity, courtType } from '../data/constants';
@@ -73,27 +74,9 @@ export default function Dashboard() {
         )}
 
         <div className="stat-grid">
-          <div className="card stat-card">
-            <span className="icon-badge blue"><Building2 className="lucide" /></span>
-            <div>
-              <div className="stat-value">{establishments.length}</div>
-              <div className="stat-label">Establecimientos</div>
-            </div>
-          </div>
-          <div className="card stat-card">
-            <span className="icon-badge green"><LayoutGrid className="lucide" /></span>
-            <div>
-              <div className="stat-value">{totalCourts}</div>
-              <div className="stat-label">Canchas registradas</div>
-            </div>
-          </div>
-          <div className="card stat-card">
-            <span className="icon-badge orange"><Coins className="lucide" /></span>
-            <div>
-              <div className="stat-value">{plan ? `${plan.commission}%` : '—'}</div>
-              <div className="stat-label">Comisión por reserva</div>
-            </div>
-          </div>
+          <StatCard icon={Building2} color="blue" value={establishments.length} label="Establecimientos" />
+          <StatCard icon={LayoutGrid} color="green" value={totalCourts} label="Canchas registradas" />
+          <StatCard icon={Coins} color="orange" value={plan ? `${plan.commission}%` : '—'} label="Comisión por reserva" />
         </div>
 
         <div className="page-head">
