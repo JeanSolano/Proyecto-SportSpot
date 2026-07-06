@@ -1,10 +1,33 @@
-// Configuracion de la capa de datos del movil.
-// La URL del API se puede sobreescribir con EXPO_PUBLIC_API_URL (Expo expone EXPO_PUBLIC_*).
-// Por defecto: el emulador de Android usa 10.0.2.2 para llegar al host; el resto usa localhost.
-// En un dispositivo fisico (Expo Go) hay que poner la IP LAN del equipo, ej:
-//   EXPO_PUBLIC_API_URL=http://192.168.1.50:4000
+// Configuracion de la capa de datos del movil: resuelve la URL del API.
+//
+// Prioridad:
+//   1. EXPO_PUBLIC_API_URL (si la defines en .env, manda sobre todo).
+//   2. IP del servidor de Expo (Metro): funciona en cualquier celular/red sin
+//      editar nada, porque Expo Go ya se conecta a esa misma IP.
+//   3. Fallback por plataforma (emulador Android: 10.0.2.2; resto: localhost).
 import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 
-const DEFAULT_HOST = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
+const PORT = 4000;
 
-export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? `http://${DEFAULT_HOST}:4000`;
+// hostUri suele venir como "192.168.1.32:8081"; tomamos solo el host.
+function hostDeExpo(): string | null {
+  const hostUri =
+    Constants.expoConfig?.hostUri ||
+    (Constants as any).expoGoConfig?.debuggerHost ||
+    (Constants as any).manifest2?.extra?.expoGo?.debuggerHost ||
+    '';
+  const host = String(hostUri).split(':')[0];
+  return host || null;
+}
+
+function urlPorDefecto(): string {
+  const host = hostDeExpo();
+  if (host && host !== 'localhost' && host !== '127.0.0.1') {
+    return `http://${host}:${PORT}`;
+  }
+  const fallback = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
+  return `http://${fallback}:${PORT}`;
+}
+
+export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? urlPorDefecto();

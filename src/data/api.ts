@@ -16,15 +16,27 @@ export async function apiFetch<T = any>(path: string, { method = 'GET', body, au
     if (token) headers.Authorization = `Bearer ${token}`;
   }
 
+  // Timeout para no dejar la UI colgada si el dispositivo no alcanza el API.
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000);
+
   let res: Response;
   try {
     res = await fetch(API_URL + path, {
       method,
       headers,
       body: body ? JSON.stringify(body) : undefined,
+      signal: controller.signal,
     });
-  } catch {
-    throw new Error(`No se pudo conectar con el servidor (${API_URL}). Verifica que el API este corriendo.`);
+  } catch (err) {
+    const abortada = err instanceof Error && err.name === 'AbortError';
+    throw new Error(
+      abortada
+        ? `El servidor no respondio (${API_URL}). Si usas un dispositivo fisico, define EXPO_PUBLIC_API_URL con la IP de tu PC.`
+        : `No se pudo conectar con el servidor (${API_URL}). Verifica que el API este corriendo.`,
+    );
+  } finally {
+    clearTimeout(timeout);
   }
 
   const data = await res.json().catch(() => ({}));
