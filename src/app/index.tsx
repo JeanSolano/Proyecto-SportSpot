@@ -1,4 +1,5 @@
 import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -16,24 +17,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import EstablishmentDetailModal from '@/components/establishment-detail-modal';
 import { BorderRadius, Shadows, Spacing, Typography } from '@/constants/theme';
 import { getEstablecimientos, type EstablecimientoResumen } from '@/data/establecimientos';
+import { sportColor } from '@/data/sports';
 import { useTheme } from '@/hooks/use-theme';
 
-// Color de marca por deporte (los nombres vienen de la BD).
-function sportColor(name: string): string {
-  const n = name.toLowerCase();
-  if (n.includes('futbol') || n.includes('fútbol')) return '#00CA4E';
-  if (n.includes('basket')) return '#0066FF';
-  if (n.includes('tenis')) return '#FF7F00';
-  if (n.includes('voley') || n.includes('voleibol')) return '#9C27B0';
-  if (n.includes('nataci')) return '#00B8D4';
-  return '#5A5A72';
-}
-
-const AVATAR_COLORS = ['#56B330', '#1E7FE0', '#F4511E', '#1B2880', '#9C27B0'];
-function avatarColor(s: string): string {
-  const sum = [...s].reduce((a, c) => a + c.charCodeAt(0), 0);
-  return AVATAR_COLORS[sum % AVATAR_COLORS.length];
-}
 function initials(nombre: string): string {
   return nombre
     .split(' ')
@@ -46,48 +32,55 @@ function initials(nombre: string): string {
 // ─── Tarjeta de establecimiento ───────────────────────────────────────────────
 function EstablecimientoCard({ item, onPress }: { item: EstablecimientoResumen; onPress: () => void }) {
   const theme = useTheme();
+  const mainSport = item.deportes[0];
+  const accent = mainSport ? sportColor(mainSport) : theme.primary;
+
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [styles.card, { backgroundColor: theme.surface, opacity: pressed ? 0.85 : 1 }, Shadows.card]}
+      style={({ pressed }) => [styles.card, { backgroundColor: theme.surface, opacity: pressed ? 0.92 : 1 }, Shadows.card]}
       accessibilityRole="button"
       accessibilityLabel={`Ver ${item.nombre}`}>
-      <View style={styles.cardTop}>
-        <View style={[styles.avatar, { backgroundColor: avatarColor(item.nombre) }]}>
-          <Text style={styles.avatarText}>{initials(item.nombre)}</Text>
+      {/* Hero con gradiente por deporte (sin foto real todavía) */}
+      <LinearGradient colors={[accent, '#1B2880']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+        <Text style={styles.heroWatermark} numberOfLines={1}>{initials(item.nombre)}</Text>
+        <View style={styles.heroTopRow}>
+          {mainSport ? (
+            <View style={styles.heroBadge}><Text style={styles.heroBadgeText}>{mainSport}</Text></View>
+          ) : <View />}
+          {item.abierto_hoy && (
+            <View style={styles.availBadge}><Text style={styles.availText}>Disponible hoy</Text></View>
+          )}
         </View>
-        <View style={{ flex: 1 }}>
-          <Text style={[styles.name, { color: theme.text }]} numberOfLines={1}>{item.nombre}</Text>
-          <Text style={[styles.address, { color: theme.textSecondary }]} numberOfLines={1}>
-            {item.direccion}
-          </Text>
+        <View>
+          <Text style={styles.heroName} numberOfLines={1}>{item.nombre}</Text>
+          <Text style={styles.heroAddress} numberOfLines={1}>{item.direccion}</Text>
         </View>
-        <Text style={[styles.chevron, { color: theme.textTertiary }]}>›</Text>
-      </View>
+      </LinearGradient>
 
-      {item.deportes.length > 0 && (
-        <View style={styles.chipRow}>
-          {item.deportes.map((d) => (
-            <View key={d} style={[styles.chip, { backgroundColor: sportColor(d) + '1A' }]}>
-              <Text style={[styles.chipText, { color: sportColor(d) }]}>{d}</Text>
-            </View>
-          ))}
-        </View>
-      )}
-
-      <View style={[styles.divider, { backgroundColor: theme.border }]} />
-
-      <View style={styles.cardFooter}>
-        <Text style={[styles.footerMeta, { color: theme.textSecondary }]}>
-          {item.canchas} {item.canchas === 1 ? 'cancha' : 'canchas'}
-        </Text>
-        {item.precio_desde != null ? (
-          <Text style={[styles.price, { color: theme.text }]}>
-            Desde <Text style={{ fontWeight: '700', color: theme.primary }}>${item.precio_desde.toFixed(2)}</Text>/h
-          </Text>
-        ) : (
-          <Text style={[styles.footerMeta, { color: theme.textTertiary }]}>Sin canchas aún</Text>
+      {/* Info */}
+      <View style={styles.cardBody}>
+        {item.deportes.length > 0 && (
+          <View style={styles.chipRow}>
+            {item.deportes.map((d) => (
+              <View key={d} style={[styles.chip, { backgroundColor: sportColor(d) + '1A' }]}>
+                <Text style={[styles.chipText, { color: sportColor(d) }]}>{d}</Text>
+              </View>
+            ))}
+          </View>
         )}
+        <View style={styles.cardFooter}>
+          <Text style={[styles.footerMeta, { color: theme.textSecondary }]}>
+            {item.canchas} {item.canchas === 1 ? 'cancha' : 'canchas'}
+          </Text>
+          {item.precio_desde != null ? (
+            <Text style={[styles.price, { color: theme.text }]}>
+              Desde <Text style={{ fontWeight: '700', color: theme.primary }}>${item.precio_desde.toFixed(2)}</Text>/h
+            </Text>
+          ) : (
+            <Text style={[styles.footerMeta, { color: theme.textTertiary }]}>Sin canchas aún</Text>
+          )}
+        </View>
       </View>
     </Pressable>
   );
@@ -96,21 +89,16 @@ function EstablecimientoCard({ item, onPress }: { item: EstablecimientoResumen; 
 // ─── Skeleton de carga ────────────────────────────────────────────────────────
 function SkeletonCard() {
   const theme = useTheme();
-  const block = (w: number | string, h: number, mt = 0) => (
-    <View style={{ width: w as any, height: h, marginTop: mt, borderRadius: 6, backgroundColor: theme.backgroundElement }} />
+  const block = (w: number | string, h: number) => (
+    <View style={{ width: w as any, height: h, borderRadius: 6, backgroundColor: theme.backgroundElement }} />
   );
   return (
     <View style={[styles.card, { backgroundColor: theme.surface }, Shadows.card]}>
-      <View style={styles.cardTop}>
-        <View style={[styles.avatar, { backgroundColor: theme.backgroundElement }]} />
-        <View style={{ flex: 1 }}>
-          {block('70%', 16)}
-          {block('50%', 12, 8)}
-        </View>
+      <View style={[styles.hero, { backgroundColor: theme.backgroundElement }]} />
+      <View style={styles.cardBody}>
+        {block('45%', 18)}
+        <View style={styles.cardFooter}>{block('30%', 12)}{block('25%', 12)}</View>
       </View>
-      {block('40%', 20, 12)}
-      <View style={[styles.divider, { backgroundColor: theme.border }]} />
-      <View style={styles.cardFooter}>{block('30%', 12)}{block('25%', 12)}</View>
     </View>
   );
 }
@@ -318,23 +306,20 @@ const styles = StyleSheet.create({
   feed: { paddingTop: Spacing.two, gap: Spacing.three, paddingHorizontal: Spacing.three },
 
   // Card
-  card: { borderRadius: BorderRadius.md, padding: Spacing.three, gap: Spacing.two },
-  cardTop: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: BorderRadius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarText: { ...Typography.bodyBold, color: '#fff' },
-  name: { ...Typography.subheading },
-  address: { ...Typography.caption, marginTop: 1 },
-  chevron: { fontSize: 24, fontWeight: '300', marginLeft: Spacing.one },
+  card: { borderRadius: BorderRadius.md, overflow: 'hidden' },
+  hero: { minHeight: 132, padding: Spacing.three, justifyContent: 'space-between', gap: Spacing.three },
+  heroWatermark: { position: 'absolute', right: Spacing.two, top: -8, fontSize: 96, fontWeight: '800', color: 'rgba(255,255,255,0.12)' },
+  heroTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  heroBadge: { backgroundColor: 'rgba(255,255,255,0.22)', paddingHorizontal: Spacing.two, paddingVertical: 4, borderRadius: BorderRadius.sm },
+  heroBadgeText: { ...Typography.badge, color: '#fff' },
+  availBadge: { backgroundColor: 'rgba(255,255,255,0.92)', paddingHorizontal: Spacing.two, paddingVertical: 4, borderRadius: BorderRadius.full },
+  availText: { ...Typography.badge, color: '#0A7B34' },
+  heroName: { ...Typography.heading, color: '#fff' },
+  heroAddress: { ...Typography.caption, color: 'rgba(255,255,255,0.9)', marginTop: 2 },
+  cardBody: { padding: Spacing.three, gap: Spacing.two },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.one },
   chip: { paddingHorizontal: Spacing.two, paddingVertical: 4, borderRadius: BorderRadius.sm },
   chipText: { ...Typography.badge },
-  divider: { height: StyleSheet.hairlineWidth, marginVertical: 2 },
   cardFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   footerMeta: { ...Typography.caption },
   price: { ...Typography.body, fontVariant: ['tabular-nums'] },

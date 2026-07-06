@@ -24,7 +24,14 @@ router.get('/', async (req, res) => {
               COALESCE(
                 ARRAY_AGG(DISTINCT t.nombre) FILTER (WHERE t.nombre IS NOT NULL),
                 '{}'
-              )                                     AS deportes
+              )                                     AS deportes,
+              EXISTS (
+                SELECT 1 FROM canchas c2
+                  JOIN cancha_horarios ch ON ch.id_cancha = c2.id_cancha
+                 WHERE c2.id_establecimiento = e.id_establecimiento
+                   AND ch.dia_semana = EXTRACT(DOW FROM CURRENT_DATE)::int
+                   AND ch.bloqueado = FALSE
+              )                                     AS abierto_hoy
          FROM establecimientos e
          JOIN usuarios u ON u.id_usuario = e.id_dueno
          LEFT JOIN canchas c ON c.id_establecimiento = e.id_establecimiento

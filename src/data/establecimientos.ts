@@ -13,6 +13,7 @@ export interface EstablecimientoResumen {
   canchas: number;
   precio_desde: number | null;
   deportes: string[];
+  abierto_hoy: boolean;
 }
 
 // ─── Detalle (perfil del establecimiento) ─────────────────────────────────────
@@ -101,5 +102,6 @@ export async function getEstablecimientos(q?: string): Promise<EstablecimientoRe
     canchas: Number(e.canchas) || 0,
     precio_desde: e.precio_desde != null ? Number(e.precio_desde) : null,
     deportes: Array.isArray(e.deportes) ? e.deportes : [],
+    abierto_hoy: !!e.abierto_hoy,
   }));
 }
