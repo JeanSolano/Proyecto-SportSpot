@@ -102,6 +102,24 @@ export async function subscribe(_ownerId, planId) {
   return { planId, status: 'active', startedAt: s.fecha_inicio, renewsAt: s.fecha_fin, provider: s.proveedor };
 }
 
+// --- Pago del plan con PayPal Sandbox (crear orden -> capturar) ---
+
+// Crea la orden en el backend (que la crea en PayPal) y devuelve el orderId.
+export async function createSubscriptionOrder(planId) {
+  const { orderId } = await apiFetch('/api/pagos/suscripciones/orden', {
+    method: 'POST',
+    body: { plan: nombrePlanDesdeId(planId) },
+  });
+  return orderId;
+}
+
+// Captura la orden aprobada; el backend activa la suscripcion real.
+export async function captureSubscriptionOrder(orderId) {
+  const r = await apiFetch(`/api/pagos/suscripciones/captura/${orderId}`, { method: 'POST' });
+  const s = r.suscripcion || {};
+  return { status: 'active', startedAt: s.fecha_inicio, renewsAt: s.fecha_fin, provider: s.proveedor };
+}
+
 // ---------------------------------------------------------------------------
 // Establecimientos  (/api/establecimientos)
 // ---------------------------------------------------------------------------
