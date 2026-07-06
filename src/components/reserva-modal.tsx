@@ -87,11 +87,14 @@ export default function ReservaModal({
     return [...set].sort((a, b) => a - b);
   }, [windows]);
 
+  // Máximo de horas seguidas disponibles desde la hora elegida (tope 3).
   const maxDuration = useMemo(() => {
     if (hour === null) return 1;
-    const w = windows.find((w) => hour >= w.s && hour < w.e);
-    return w ? Math.min(3, w.e - hour) : 1;
-  }, [hour, windows]);
+    const set = new Set(startHours);
+    let d = 0;
+    while (d < 3 && set.has(hour + d)) d += 1;
+    return Math.max(1, d);
+  }, [hour, startHours]);
 
   const dur = Math.min(duration, maxDuration);
   const total = cancha ? cancha.precio_hora * dur : 0;

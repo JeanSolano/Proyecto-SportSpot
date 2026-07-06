@@ -111,17 +111,19 @@ router.post('/', verificarToken, async (req, res) => {
       return res.status(400).json({ error: 'La cancha no esta disponible' });
     }
 
-    // 2) El bloque solicitado debe caer en un horario habilitado y no bloqueado
+    // 2) El bloque debe estar cubierto por franjas horarias habilitadas.
+    //    Los horarios se definen en franjas de 1 hora; una reserva de N horas
+    //    debe cubrir N franjas contiguas no bloqueadas dentro del rango [inicio, fin).
     const disp = await client.query(
-      `SELECT 1 FROM cancha_horarios
+      `SELECT COUNT(*)::int AS cubiertas FROM cancha_horarios
         WHERE id_cancha = $1
           AND dia_semana = EXTRACT(DOW FROM $2::date)
           AND bloqueado = FALSE
-          AND hora_inicio <= $3::time AND hora_fin >= $4::time
-        LIMIT 1`,
+          AND hora_inicio >= $3::time
+          AND hora_fin <= $4::time`,
       [id_cancha, fecha_reserva, hora_inicio, hora_fin],
     );
-    if (disp.rowCount === 0) {
+    if (disp.rows[0].cubiertas < horas) {
       await client.query('ROLLBACK');
       return res.status(400).json({ error: 'Horario no disponible para esa cancha' });
     }
