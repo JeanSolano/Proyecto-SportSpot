@@ -20,6 +20,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/usuarios', require('./routes/usuarios'));
 app.use('/api/establecimientos', require('./routes/establecimientos'));
 app.use('/api/canchas', require('./routes/canchas'));
+app.use('/api/reservas', require('./routes/reservas'));
 
 // 404
 app.use((req, res) => res.status(404).json({ error: 'Ruta no encontrada' }));
