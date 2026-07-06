@@ -71,7 +71,7 @@ function Field({
 export default function RegisterScreen({ onGoLogin }: { onGoLogin?: () => void } = {}) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const { login } = useAuth();
+  const { register } = useAuth();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -85,7 +85,7 @@ export default function RegisterScreen({ onGoLogin }: { onGoLogin?: () => void }
   const passwordsMatch = password === confirmPassword && confirmPassword.length > 0;
   const canSubmit = name.trim().length > 0 && isEmailValid && isPasswordValid && passwordsMatch && selectedSport !== '';
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!name.trim()) { Alert.alert('Nombre requerido', 'Ingresa tu nombre completo.'); return; }
     if (!isEmailValid) { Alert.alert('Email inválido', 'Ingresa un correo electrónico válido.'); return; }
     if (!isPasswordValid) { Alert.alert('Contraseña muy corta', 'La contraseña debe tener al menos 6 caracteres.'); return; }
@@ -93,10 +93,13 @@ export default function RegisterScreen({ onGoLogin }: { onGoLogin?: () => void }
     if (!selectedSport) { Alert.alert('Deporte requerido', 'Selecciona tu deporte favorito.'); return; }
 
     setLoading(true);
-    setTimeout(() => {
+    try {
+      await register({ nombre: name.trim(), correo: email.trim(), contrasena: password });
+    } catch (err) {
+      Alert.alert('No se pudo crear la cuenta', err instanceof Error ? err.message : 'Intenta de nuevo.');
+    } finally {
       setLoading(false);
-      login();
-    }, 1600);
+    }
   };
 
   return (

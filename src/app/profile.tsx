@@ -81,7 +81,7 @@ function BookingCard({
 export default function ProfileScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const { logout } = useAuth();
+  const { usuario, logout } = useAuth();
   const { bookings, cancelBooking } = useBookings();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [showDashboard, setShowDashboard] = useState(false);
@@ -131,8 +131,8 @@ export default function ProfileScreen() {
 
       {/* User info */}
       <View style={styles.userInfo}>
-        <Text style={[styles.userName, { color: theme.text }]}>Carlos Méndez</Text>
-        <Text style={[styles.handle, { color: theme.textSecondary }]}>@carlosdeportivo</Text>
+        <Text style={[styles.userName, { color: theme.text }]}>{usuario?.nombre ?? 'Usuario'}</Text>
+        <Text style={[styles.handle, { color: theme.textSecondary }]}>{usuario?.correo ?? ''}</Text>
 
         <View style={styles.badgesRow}>
           <View style={styles.premiumBadge}>

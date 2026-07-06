@@ -81,16 +81,19 @@ export default function LoginScreen({ onGoRegister }: { onGoRegister?: () => voi
 
   const canSubmit = email.trim().length > 0 && password.length >= 4;
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!canSubmit) {
       Alert.alert('Campos incompletos', 'Ingresa tu correo y contraseña para continuar.');
       return;
     }
     setLoading(true);
-    setTimeout(() => {
+    try {
+      await login(email.trim(), password);
+    } catch (err) {
+      Alert.alert('No se pudo iniciar sesión', err instanceof Error ? err.message : 'Intenta de nuevo.');
+    } finally {
       setLoading(false);
-      login();
-    }, 1400);
+    }
   };
 
   return (
