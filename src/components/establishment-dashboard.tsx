@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { VENUES } from '@/app/index';
+import { VENUES } from '@/data/mock-venues';
 import { BorderRadius, Gradients, Shadows, Spacing, Typography } from '@/constants/theme';
 import { useBookings } from '@/context/bookings';
 import { useTheme } from '@/hooks/use-theme';

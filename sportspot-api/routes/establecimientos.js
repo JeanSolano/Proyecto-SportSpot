@@ -20,10 +20,15 @@ router.get('/', async (req, res) => {
       `SELECT e.id_establecimiento, e.nombre, e.descripcion, e.direccion,
               e.ubicacion_lat, e.ubicacion_lng, e.estado, u.nombre AS dueno,
               COUNT(DISTINCT c.id_cancha)          AS canchas,
-              MIN(c.precio_hora)                   AS precio_desde
+              MIN(c.precio_hora)                   AS precio_desde,
+              COALESCE(
+                ARRAY_AGG(DISTINCT t.nombre) FILTER (WHERE t.nombre IS NOT NULL),
+                '{}'
+              )                                     AS deportes
          FROM establecimientos e
          JOIN usuarios u ON u.id_usuario = e.id_dueno
          LEFT JOIN canchas c ON c.id_establecimiento = e.id_establecimiento
+         LEFT JOIN tipos_deporte t ON t.id_tipo = c.id_tipo_deporte
          ${filtro}
         GROUP BY e.id_establecimiento, u.nombre
         ORDER BY e.created_at DESC`,

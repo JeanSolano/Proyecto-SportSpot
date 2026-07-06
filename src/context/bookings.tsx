@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
-import type { Venue } from '@/app/index';
+import type { Venue } from '@/data/mock-venues';
 
 export interface Booking {
   id: string;
