@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { User, Mail, Phone, Lock, Trophy, Clock, Bell, AlertCircle, Check } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
+import GoogleButton from '../components/GoogleButton.jsx';
 
 export default function Register() {
-  const { register } = useAuth();
+  const { register, loginGoogle } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [params] = useSearchParams();
@@ -26,6 +27,18 @@ export default function Register() {
     setLoading(true);
     try {
       await register({ name: form.name, email: form.email, phone: form.phone, password: form.password });
+      navigate(from, { replace: true });
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+    }
+  };
+
+  const registrarConGoogle = async (credential) => {
+    setError('');
+    setLoading(true);
+    try {
+      await loginGoogle(credential);
       navigate(from, { replace: true });
     } catch (err) {
       setError(err.message);
@@ -99,6 +112,9 @@ export default function Register() {
               {loading ? <span className="spinner" /> : 'Crear cuenta'}
             </button>
           </form>
+
+          <div className="auth-divider"><span>o</span></div>
+          <GoogleButton onCredential={registrarConGoogle} text="signup_with" />
 
           <p className="auth-switch">
             ¿Ya tienes cuenta? <Link to="/login" state={{ from }}>Inicia sesión</Link>

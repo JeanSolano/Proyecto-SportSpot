@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Mail, Lock, Building2, CalendarClock, BarChart3, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
+import GoogleButton from '../components/GoogleButton.jsx';
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, loginGoogle } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [params] = useSearchParams();
@@ -20,6 +21,18 @@ export default function Login() {
     setLoading(true);
     try {
       await login({ email, password });
+      navigate(from, { replace: true });
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+    }
+  };
+
+  const entrarConGoogle = async (credential) => {
+    setError('');
+    setLoading(true);
+    try {
+      await loginGoogle(credential);
       navigate(from, { replace: true });
     } catch (err) {
       setError(err.message);
@@ -82,6 +95,9 @@ export default function Login() {
               {loading ? <span className="spinner" /> : 'Entrar al panel'}
             </button>
           </form>
+
+          <div className="auth-divider"><span>o</span></div>
+          <GoogleButton onCredential={entrarConGoogle} text="signin_with" />
 
           <p className="auth-switch">
             ¿No tienes cuenta? <Link to="/register" state={{ from }}>Regístrate como dueño</Link>

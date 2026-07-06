@@ -25,13 +25,19 @@ export function AuthProvider({ children }) {
     return o;
   };
 
+  const loginGoogle = async (credential) => {
+    const o = await store.loginWithGoogle(credential);
+    setOwner(o);
+    return o;
+  };
+
   const logout = () => {
     store.logout();
     setOwner(null);
   };
 
   return (
-    <AuthContext.Provider value={{ owner, isAuthenticated: !!owner, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ owner, isAuthenticated: !!owner, loading, login, register, loginGoogle, logout }}>
       {children}
     </AuthContext.Provider>
   );

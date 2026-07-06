@@ -224,6 +224,10 @@ h3 { font-size: 18px; font-weight: 600; }
 .auth-card h2 { font-size: 26px; margin-bottom: 6px; }
 .auth-card > .muted { margin-bottom: 26px; }
 .auth-switch { text-align: center; margin-top: 22px; font-size: 14.5px; color: var(--text-secondary); }
+.auth-divider { display: flex; align-items: center; text-align: center; color: var(--text-tertiary); font-size: 13px; margin: 18px 0; }
+.auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.auth-divider span { padding: 0 12px; }
+.gbtn { display: flex; justify-content: center; min-height: 44px; }
 @media (max-width: 900px) { .auth-wrap { grid-template-columns: 1fr; } .auth-hero { display: none; } }
 
 /* =========================================================================

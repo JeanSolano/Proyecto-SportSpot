@@ -1,16 +1,16 @@
 /**
- * Capa de datos del panel admin — SOLO FRONTEND.
+ * Capa de datos del panel admin.
  *
- * Hoy persiste en localStorage para que la demo sea "pegajosa" entre recargas.
- * Cuando exista el API de Node/Express + base de datos, reemplaza el cuerpo de
- * estas funciones por llamadas `fetch('/api/...')`. Las pantallas no cambian:
- * solo dependen de la firma de estas funciones (todas devuelven Promesas).
+ * AUTENTICACION: ya conectada al API REST (PostgreSQL) vía api.js.
+ * SUSCRIPCION y ESTABLECIMIENTOS: todavia mock en localStorage (se migran en el
+ * siguiente paso). Como se indexan por el id del dueno, funcionan con el UUID
+ * real que ahora devuelve el API.
  */
+import { apiFetch, clearToken, setToken } from './api';
 
-const OWNERS_KEY = 'sportspot_owners';
-const SESSION_KEY = 'sportspot_session';
-const ESTABLISHMENTS_KEY = 'sportspot_establishments';
+const OWNER_KEY = 'sportspot_owner';
 const SUBSCRIPTIONS_KEY = 'sportspot_subscriptions';
+const ESTABLISHMENTS_KEY = 'sportspot_establishments';
 
 const read = (key, fallback) => {
   try {
@@ -20,57 +20,69 @@ const read = (key, fallback) => {
     return fallback;
   }
 };
-
 const write = (key, value) => localStorage.setItem(key, JSON.stringify(value));
-
 const uid = () => Math.random().toString(36).slice(2, 10);
-
-// Simula latencia de red para que los spinners se sientan reales.
-const delay = (ms = 450) => new Promise((r) => setTimeout(r, ms));
+const delay = (ms = 400) => new Promise((r) => setTimeout(r, ms));
 
 // ---------------------------------------------------------------------------
-// Autenticación de dueños
+// Autenticación de dueños  (API REST)
 // ---------------------------------------------------------------------------
+
+const mapOwner = (u) => ({
+  id: u.id_usuario,
+  name: u.nombre,
+  email: u.correo,
+  phone: u.telefono || '',
+  rol: u.nombre_rol || u.rol,
+});
 
 export async function registerOwner({ name, email, password, phone }) {
-  await delay();
-  const owners = read(OWNERS_KEY, []);
-  const normalized = email.trim().toLowerCase();
-  if (owners.some((o) => o.email === normalized)) {
-    throw new Error('Ya existe una cuenta con ese correo.');
-  }
-  const owner = { id: uid(), name: name.trim(), email: normalized, password, phone: phone?.trim() ?? '' };
-  owners.push(owner);
-  write(OWNERS_KEY, owners);
-  write(SESSION_KEY, owner.id);
-  return publicOwner(owner);
+  const data = await apiFetch('/api/auth/registro', {
+    method: 'POST',
+    auth: false,
+    body: { nombre: name, correo: email, contrasena: password, telefono: phone, rol: 'dueno' },
+  });
+  setToken(data.token);
+  const owner = mapOwner(data.usuario);
+  write(OWNER_KEY, owner);
+  return owner;
 }
 
 export async function loginOwner({ email, password }) {
-  await delay();
-  const owners = read(OWNERS_KEY, []);
-  const normalized = email.trim().toLowerCase();
-  const owner = owners.find((o) => o.email === normalized && o.password === password);
-  if (!owner) throw new Error('Correo o contraseña incorrectos.');
-  write(SESSION_KEY, owner.id);
-  return publicOwner(owner);
+  const data = await apiFetch('/api/auth/login', {
+    method: 'POST',
+    auth: false,
+    body: { correo: email, contrasena: password },
+  });
+  setToken(data.token);
+  const owner = mapOwner(data.usuario);
+  write(OWNER_KEY, owner);
+  return owner;
+}
+
+export async function loginWithGoogle(credential) {
+  const data = await apiFetch('/api/auth/google', {
+    method: 'POST',
+    auth: false,
+    body: { credential, rol: 'dueno' },
+  });
+  setToken(data.token);
+  const owner = mapOwner(data.usuario);
+  write(OWNER_KEY, owner);
+  return owner;
 }
 
 export function logout() {
-  localStorage.removeItem(SESSION_KEY);
+  clearToken();
+  localStorage.removeItem(OWNER_KEY);
 }
 
 export function getCurrentOwner() {
-  const id = read(SESSION_KEY, null);
-  if (!id) return null;
-  const owner = read(OWNERS_KEY, []).find((o) => o.id === id);
-  return owner ? publicOwner(owner) : null;
+  return read(OWNER_KEY, null);
 }
 
-const publicOwner = ({ id, name, email, phone }) => ({ id, name, email, phone });
-
 // ---------------------------------------------------------------------------
-// Suscripción (modelo híbrido: plan + comisión). Mock con localStorage.
+// Suscripción (mock — se migra a /api/suscripciones en el paso 5b)
 // ---------------------------------------------------------------------------
 
 export async function getSubscription(ownerId) {
@@ -78,9 +90,8 @@ export async function getSubscription(ownerId) {
   return read(SUBSCRIPTIONS_KEY, {})[ownerId] ?? null;
 }
 
-/** Simula el cobro vía PayPal Sandbox y activa el plan. */
 export async function subscribe(ownerId, planId) {
-  await delay(900); // simula el redirect/confirmación de PayPal
+  await delay(900); // simula el redirect/confirmacion de PayPal
   const all = read(SUBSCRIPTIONS_KEY, {});
   all[ownerId] = {
     planId,
@@ -103,7 +114,7 @@ export async function cancelSubscription(ownerId) {
 }
 
 // ---------------------------------------------------------------------------
-// Establecimientos
+// Establecimientos (mock — se migra a /api/establecimientos en el paso 5b)
 // ---------------------------------------------------------------------------
 
 export async function getEstablishments(ownerId) {
