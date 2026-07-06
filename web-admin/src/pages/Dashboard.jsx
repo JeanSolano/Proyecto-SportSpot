@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Building2, LayoutGrid, Coins, Rocket, CreditCard } from 'lucide-react';
+import { Plus, Building2, LayoutGrid, Coins, Rocket, CreditCard, CalendarClock, Clock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import StatCard from '../components/StatCard.jsx';
-import { getEstablishments, getSubscription } from '../data/store';
+import { getEstablishments, getSubscription, getAgendaHoy } from '../data/store';
 import { planById } from '../data/plans';
 import { amenity, courtType } from '../data/constants';
 
@@ -12,12 +12,18 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [establishments, setEstablishments] = useState([]);
   const [sub, setSub] = useState(null);
+  const [agenda, setAgenda] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([getEstablishments(owner.id), getSubscription(owner.id)]).then(([e, s]) => {
+    Promise.all([
+      getEstablishments(owner.id),
+      getSubscription(owner.id),
+      getAgendaHoy().catch(() => []),
+    ]).then(([e, s, a]) => {
       setEstablishments(e);
       setSub(s);
+      setAgenda(a);
       setLoading(false);
     });
   }, [owner.id]);
@@ -25,6 +31,10 @@ export default function Dashboard() {
   const plan = sub?.status === 'active' ? planById(sub.planId) : null;
   const atLimit = plan && establishments.length >= plan.maxEstablishments;
   const totalCourts = establishments.reduce((sum, e) => sum + e.courts.length, 0);
+  const ingresosHoy = agenda
+    .filter((r) => r.status !== 'cancelada')
+    .reduce((sum, r) => sum + r.total, 0);
+  const hoyLabel = new Date().toLocaleDateString('es-PA', { weekday: 'long', day: '2-digit', month: 'long' });
 
   const handleNew = () => {
     if (!plan) {
@@ -74,9 +84,55 @@ export default function Dashboard() {
         )}
 
         <div className="stat-grid">
+          <StatCard icon={CalendarClock} color="navy" value={agenda.length} label="Reservas hoy" />
+          <StatCard icon={Coins} color="green" tnum value={`$${ingresosHoy.toFixed(2)}`} label="Ingresos de hoy" />
           <StatCard icon={Building2} color="blue" value={establishments.length} label="Establecimientos" />
-          <StatCard icon={LayoutGrid} color="green" value={totalCourts} label="Canchas registradas" />
-          <StatCard icon={Coins} color="orange" value={plan ? `${plan.commission}%` : '—'} label="Comisión por reserva" />
+          <StatCard icon={LayoutGrid} color="orange" value={totalCourts} label="Canchas registradas" />
+        </div>
+
+        {/* Agenda del día: reservas hechas desde la app móvil */}
+        <div className="card card-pad" style={{ marginBottom: 26 }}>
+          <div className="page-head" style={{ marginBottom: 16 }}>
+            <div>
+              <h3 style={{ margin: 0 }}>Agenda de hoy</h3>
+              <span className="muted tiny" style={{ textTransform: 'capitalize' }}>{hoyLabel}</span>
+            </div>
+            <span className="badge" style={{ background: 'var(--secondary)' }}>
+              {agenda.length} {agenda.length === 1 ? 'reserva' : 'reservas'}
+            </span>
+          </div>
+
+          {loading ? (
+            <p className="muted">Cargando…</p>
+          ) : agenda.length === 0 ? (
+            <div className="agenda-empty">
+              <CalendarClock className="lucide" />
+              <div>
+                <strong>Sin reservas para hoy</strong>
+                <p className="muted tiny">Las reservas hechas desde la app móvil aparecerán aquí.</p>
+              </div>
+            </div>
+          ) : (
+            <div className="agenda-list">
+              {agenda.map((r) => (
+                <div key={r.id} className="agenda-row">
+                  <div className="agenda-time">
+                    <Clock className="lucide" />
+                    <span>{r.start}<span className="muted tiny"> – {r.end}</span></span>
+                  </div>
+                  <div className="agenda-main">
+                    <strong>{r.client}</strong>
+                    <span className="muted tiny">{r.court} · {r.establishment}</span>
+                  </div>
+                  <span className="badge" style={{ background: 'var(--secondary)' }}>{r.sport}</span>
+                  <div className="agenda-right">
+                    <strong className="tnum">${r.total.toFixed(2)}</strong>
+                    <span className={`status-chip ${r.status}`}>{r.statusLabel}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="page-head">

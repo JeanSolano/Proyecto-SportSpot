@@ -121,6 +121,38 @@ export async function captureSubscriptionOrder(orderId) {
 }
 
 // ---------------------------------------------------------------------------
+// Agenda / reservas del día  (/api/reservas/agenda)
+// ---------------------------------------------------------------------------
+
+const hhmm = (t) => (t ? String(t).slice(0, 5) : '');
+
+const ESTADO_LABEL = {
+  pendiente_pago: 'Pendiente de pago',
+  confirmada: 'Confirmada',
+  completada: 'Completada',
+  cancelada: 'Cancelada',
+  no_show: 'No-show',
+};
+
+// Reservas del día (por defecto hoy) de todos los establecimientos del dueño.
+export async function getAgendaHoy(fecha) {
+  const rows = await apiFetch(`/api/reservas/agenda${fecha ? `?fecha=${fecha}` : ''}`);
+  return rows.map((r) => ({
+    id: r.id_reserva,
+    establishment: r.establecimiento,
+    court: r.cancha,
+    sport: r.deporte,
+    client: r.cliente,
+    start: hhmm(r.hora_inicio),
+    end: hhmm(r.hora_fin),
+    total: Number(r.precio_total),
+    commission: Number(r.comision_monto),
+    status: r.estado,
+    statusLabel: ESTADO_LABEL[r.estado] || r.estado,
+  }));
+}
+
+// ---------------------------------------------------------------------------
 // Establecimientos  (/api/establecimientos)
 // ---------------------------------------------------------------------------
 

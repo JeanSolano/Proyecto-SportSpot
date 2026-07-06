@@ -1,7 +1,7 @@
 // CRUD de reservas. El POST es la transaccion estrella (disponibilidad + total en el servidor).
 const express = require('express');
 const pool = require('../config/db');
-const { verificarToken } = require('../middleware/auth');
+const { verificarToken, soloRol } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -56,6 +56,32 @@ router.get('/establecimiento/:idEst', verificarToken, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Error al obtener las reservas del establecimiento' });
+  }
+});
+
+// GET /api/reservas/agenda?fecha=YYYY-MM-DD  (Dueno) - reservas de un dia de TODOS
+// sus establecimientos (agenda del panel). Sin fecha, usa hoy.
+router.get('/agenda', verificarToken, soloRol('Dueno'), async (req, res) => {
+  const fecha = req.query.fecha || null;
+  try {
+    const r = await pool.query(
+      `SELECT r.id_reserva, r.fecha_reserva, r.hora_inicio, r.hora_fin, r.precio_total,
+              r.comision_monto, r.estado, c.nombre AS cancha, e.nombre AS establecimiento,
+              t.nombre AS deporte, u.nombre AS cliente
+         FROM reservas r
+         JOIN canchas c ON c.id_cancha = r.id_cancha
+         JOIN tipos_deporte t ON t.id_tipo = c.id_tipo_deporte
+         JOIN establecimientos e ON e.id_establecimiento = c.id_establecimiento
+         JOIN usuarios u ON u.id_usuario = r.id_usuario
+        WHERE e.id_dueno = $1
+          AND r.fecha_reserva = COALESCE($2::date, CURRENT_DATE)
+        ORDER BY r.hora_inicio`,
+      [req.usuario.id_usuario, fecha],
+    );
+    res.json(r.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al obtener la agenda del dia' });
   }
 });
 

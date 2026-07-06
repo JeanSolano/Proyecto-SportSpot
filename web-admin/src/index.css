@@ -574,6 +574,30 @@ h3 { font-size: 18px; font-weight: 600; }
   .ap-card { margin: 0 auto; }
 }
 
+/* ---- Agenda del día (dashboard) ---- */
+.tnum { font-variant-numeric: tabular-nums; }
+.agenda-empty { display: flex; align-items: center; gap: 14px; padding: 12px 4px; }
+.agenda-empty .lucide { width: 30px; height: 30px; color: var(--text-tertiary); flex: none; }
+.agenda-empty p { margin: 2px 0 0; }
+.agenda-list { display: flex; flex-direction: column; }
+.agenda-row { display: flex; align-items: center; gap: 14px; padding: 14px 4px; border-top: 1px solid var(--border); }
+.agenda-row:first-child { border-top: none; }
+.agenda-time { display: flex; align-items: center; gap: 7px; min-width: 132px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.agenda-time .lucide { width: 16px; height: 16px; color: var(--secondary); flex: none; }
+.agenda-main { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.agenda-main strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.agenda-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex: none; }
+.status-chip { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: var(--radius-full); white-space: nowrap; }
+.status-chip.pendiente_pago { background: #fff4e5; color: #b26a00; }
+.status-chip.confirmada { background: var(--selected); color: var(--primary-dark); }
+.status-chip.completada { background: #e8f0fe; color: var(--secondary-dark); }
+.status-chip.cancelada { background: #fdecee; color: var(--danger); }
+.status-chip.no_show { background: #f0f0f4; color: var(--text-secondary); }
+@media (max-width: 620px) {
+  .agenda-row { flex-wrap: wrap; }
+  .agenda-time { min-width: 0; }
+}
+
 /* ---- Respeta motion reducido ---- */
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1; transform: none; }
