@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import EstablishmentDetailModal from '@/components/establishment-detail-modal';
 import { BorderRadius, Shadows, Spacing, Typography } from '@/constants/theme';
 import { getEstablecimientos, type EstablecimientoResumen } from '@/data/establecimientos';
 import { useTheme } from '@/hooks/use-theme';
@@ -43,10 +44,14 @@ function initials(nombre: string): string {
 }
 
 // ─── Tarjeta de establecimiento ───────────────────────────────────────────────
-function EstablecimientoCard({ item }: { item: EstablecimientoResumen }) {
+function EstablecimientoCard({ item, onPress }: { item: EstablecimientoResumen; onPress: () => void }) {
   const theme = useTheme();
   return (
-    <View style={[styles.card, { backgroundColor: theme.surface }, Shadows.card]}>
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.card, { backgroundColor: theme.surface, opacity: pressed ? 0.85 : 1 }, Shadows.card]}
+      accessibilityRole="button"
+      accessibilityLabel={`Ver ${item.nombre}`}>
       <View style={styles.cardTop}>
         <View style={[styles.avatar, { backgroundColor: avatarColor(item.nombre) }]}>
           <Text style={styles.avatarText}>{initials(item.nombre)}</Text>
@@ -57,6 +62,7 @@ function EstablecimientoCard({ item }: { item: EstablecimientoResumen }) {
             {item.direccion}
           </Text>
         </View>
+        <Text style={[styles.chevron, { color: theme.textTertiary }]}>›</Text>
       </View>
 
       {item.deportes.length > 0 && (
@@ -83,7 +89,7 @@ function EstablecimientoCard({ item }: { item: EstablecimientoResumen }) {
           <Text style={[styles.footerMeta, { color: theme.textTertiary }]}>Sin canchas aún</Text>
         )}
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -121,6 +127,7 @@ export default function HomeScreen() {
   const [search, setSearch] = useState('');
   const [debounced, setDebounced] = useState('');
   const [sport, setSport] = useState('Todos');
+  const [detailId, setDetailId] = useState<string | null>(null);
 
   // Debounce del buscador (400ms) para no golpear el API en cada tecla.
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -245,7 +252,9 @@ export default function HomeScreen() {
         <FlatList
           data={filtered}
           keyExtractor={(e) => e.id_establecimiento}
-          renderItem={({ item }) => <EstablecimientoCard item={item} />}
+          renderItem={({ item }) => (
+            <EstablecimientoCard item={item} onPress={() => setDetailId(item.id_establecimiento)} />
+          )}
           ListHeaderComponent={header}
           contentContainerStyle={[styles.feed, { paddingBottom: insets.bottom + Spacing.six }]}
           showsVerticalScrollIndicator={false}
@@ -264,6 +273,8 @@ export default function HomeScreen() {
           }
         />
       )}
+
+      <EstablishmentDetailModal id={detailId} onClose={() => setDetailId(null)} />
     </View>
   );
 }
@@ -319,6 +330,7 @@ const styles = StyleSheet.create({
   avatarText: { ...Typography.bodyBold, color: '#fff' },
   name: { ...Typography.subheading },
   address: { ...Typography.caption, marginTop: 1 },
+  chevron: { fontSize: 24, fontWeight: '300', marginLeft: Spacing.one },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.one },
   chip: { paddingHorizontal: Spacing.two, paddingVertical: 4, borderRadius: BorderRadius.sm },
   chipText: { ...Typography.badge },
