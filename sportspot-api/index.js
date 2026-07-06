@@ -18,6 +18,8 @@ app.get('/api/health', (req, res) => res.json({ ok: true }));
 // Rutas
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/usuarios', require('./routes/usuarios'));
+app.use('/api/establecimientos', require('./routes/establecimientos'));
+app.use('/api/canchas', require('./routes/canchas'));
 
 // 404
 app.use((req, res) => res.status(404).json({ error: 'Ruta no encontrada' }));
