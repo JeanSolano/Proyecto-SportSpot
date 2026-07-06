@@ -55,19 +55,27 @@ router.get('/:id/horarios', async (req, res) => {
 
 // POST /api/canchas  (Dueno) - crea una cancha en un establecimiento propio
 router.post('/', verificarToken, soloRol('Dueno'), async (req, res) => {
-  const { id_establecimiento, id_tipo_deporte, nombre, descripcion, precio_hora, capacidad_jugadores, specs } = req.body;
-  if (!id_establecimiento || !id_tipo_deporte || !nombre || precio_hora == null) {
-    return res.status(400).json({ error: 'id_establecimiento, id_tipo_deporte, nombre y precio_hora son obligatorios' });
+  const { id_establecimiento, id_tipo_deporte, deporte, nombre, descripcion, precio_hora, capacidad_jugadores, specs } = req.body;
+  if (!id_establecimiento || !nombre || precio_hora == null || (!id_tipo_deporte && !deporte)) {
+    return res.status(400).json({ error: 'id_establecimiento, nombre, precio_hora y el tipo de deporte son obligatorios' });
   }
   try {
     const own = await pool.query('SELECT id_dueno FROM establecimientos WHERE id_establecimiento = $1', [id_establecimiento]);
     if (own.rowCount === 0) return res.status(404).json({ error: 'Establecimiento no encontrado' });
     if (own.rows[0].id_dueno !== req.usuario.id_usuario) return res.status(403).json({ error: 'Ese establecimiento no es tuyo' });
 
+    // El deporte puede venir como id o como nombre
+    let tipoId = id_tipo_deporte;
+    if (!tipoId && deporte) {
+      const t = await pool.query('SELECT id_tipo FROM tipos_deporte WHERE LOWER(nombre) = LOWER($1)', [deporte]);
+      if (t.rowCount === 0) return res.status(400).json({ error: `Deporte invalido: ${deporte}` });
+      tipoId = t.rows[0].id_tipo;
+    }
+
     const ins = await pool.query(
       `INSERT INTO canchas (id_establecimiento, id_tipo_deporte, nombre, descripcion, precio_hora, capacidad_jugadores, specs)
        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-      [id_establecimiento, id_tipo_deporte, nombre, descripcion || null, precio_hora, capacidad_jugadores || null, specs || null],
+      [id_establecimiento, tipoId, nombre, descripcion || null, precio_hora, capacidad_jugadores || null, specs || null],
     );
     res.status(201).json(ins.rows[0]);
   } catch (err) {

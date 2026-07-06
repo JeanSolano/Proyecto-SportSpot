@@ -1,16 +1,15 @@
 /**
- * Capa de datos del panel admin.
- *
- * AUTENTICACION: ya conectada al API REST (PostgreSQL) vía api.js.
- * SUSCRIPCION y ESTABLECIMIENTOS: todavia mock en localStorage (se migran en el
- * siguiente paso). Como se indexan por el id del dueno, funcionan con el UUID
- * real que ahora devuelve el API.
+ * Capa de datos del panel admin — conectada al API REST (PostgreSQL) vía api.js.
+ * Las firmas se mantienen (Promesas) para no tocar las pantallas; internamente
+ * traducen entre la forma del frontend y el esquema de la BD con adapters.js.
  */
 import { apiFetch, clearToken, setToken } from './api';
+import {
+  DEPORTE_A_DB, deporteDesdeDb, AMENIDAD_A_DB, amenidadDesdeDb,
+  DIA_A_DB, diaDesdeDb, slotDesdeHora, horaFinDeSlot,
+} from './adapters';
 
 const OWNER_KEY = 'sportspot_owner';
-const SUBSCRIPTIONS_KEY = 'sportspot_subscriptions';
-const ESTABLISHMENTS_KEY = 'sportspot_establishments';
 
 const read = (key, fallback) => {
   try {
@@ -21,11 +20,9 @@ const read = (key, fallback) => {
   }
 };
 const write = (key, value) => localStorage.setItem(key, JSON.stringify(value));
-const uid = () => Math.random().toString(36).slice(2, 10);
-const delay = (ms = 400) => new Promise((r) => setTimeout(r, ms));
 
 // ---------------------------------------------------------------------------
-// Autenticación de dueños  (API REST)
+// Autenticación de dueños
 // ---------------------------------------------------------------------------
 
 const mapOwner = (u) => ({
@@ -82,74 +79,116 @@ export function getCurrentOwner() {
 }
 
 // ---------------------------------------------------------------------------
-// Suscripción (mock — se migra a /api/suscripciones en el paso 5b)
+// Suscripción  (/api/suscripciones)
 // ---------------------------------------------------------------------------
 
-export async function getSubscription(ownerId) {
-  await delay(250);
-  return read(SUBSCRIPTIONS_KEY, {})[ownerId] ?? null;
-}
+const planIdDesdeNombre = (nombre) => String(nombre || '').toLowerCase(); // 'Pro' -> 'pro'
+const nombrePlanDesdeId = (planId) => (planId ? planId.charAt(0).toUpperCase() + planId.slice(1) : ''); // 'pro' -> 'Pro'
 
-export async function subscribe(ownerId, planId) {
-  await delay(900); // simula el redirect/confirmacion de PayPal
-  const all = read(SUBSCRIPTIONS_KEY, {});
-  all[ownerId] = {
-    planId,
-    status: 'active',
-    startedAt: new Date().toISOString(),
-    renewsAt: new Date(Date.now() + 30 * 86400000).toISOString(),
-    provider: 'paypal-sandbox',
+export async function getSubscription() {
+  const s = await apiFetch('/api/suscripciones/mia');
+  if (!s) return null;
+  return {
+    planId: planIdDesdeNombre(s.plan),
+    status: s.estado === 'activa' ? 'active' : s.estado,
+    startedAt: s.fecha_inicio,
+    renewsAt: s.fecha_fin,
+    provider: s.proveedor,
   };
-  write(SUBSCRIPTIONS_KEY, all);
-  return all[ownerId];
 }
 
-export async function cancelSubscription(ownerId) {
-  await delay(300);
-  const all = read(SUBSCRIPTIONS_KEY, {});
-  if (all[ownerId]) {
-    all[ownerId] = { ...all[ownerId], status: 'cancelled' };
-    write(SUBSCRIPTIONS_KEY, all);
-  }
+export async function subscribe(_ownerId, planId) {
+  const s = await apiFetch('/api/suscripciones', { method: 'POST', body: { plan: nombrePlanDesdeId(planId) } });
+  return { planId, status: 'active', startedAt: s.fecha_inicio, renewsAt: s.fecha_fin, provider: s.proveedor };
 }
 
 // ---------------------------------------------------------------------------
-// Establecimientos (mock — se migra a /api/establecimientos en el paso 5b)
+// Establecimientos  (/api/establecimientos)
 // ---------------------------------------------------------------------------
 
-export async function getEstablishments(ownerId) {
-  await delay(300);
-  return read(ESTABLISHMENTS_KEY, []).filter((e) => e.ownerId === ownerId);
+const ownerNombre = () => read(OWNER_KEY, {})?.name || '';
+
+const canchaDesdeDb = (c) => {
+  const horarios = c.horarios || [];
+  const days = [...new Set(horarios.map((h) => diaDesdeDb(h.dia_semana)).filter(Boolean))];
+  const slots = [...new Set(horarios.map((h) => slotDesdeHora(h.hora_inicio)))].sort();
+  return { id: c.id_cancha, name: c.nombre, type: deporteDesdeDb(c.deporte), precio: c.precio_hora, days, slots };
+};
+
+const estDesdeDb = (e) => ({
+  id: e.id_establecimiento,
+  ownerName: e.dueno || ownerNombre(),
+  name: e.nombre,
+  description: e.descripcion || '',
+  direccion: e.direccion || '',
+  lat: e.ubicacion_lat,
+  lng: e.ubicacion_lng,
+  amenities: (e.amenidades || []).map(amenidadDesdeDb).filter(Boolean),
+  courts: (e.canchas || []).map(canchaDesdeDb),
+  published: e.estado === 'activo',
+});
+
+export async function getEstablishments() {
+  const rows = await apiFetch('/api/establecimientos/mios');
+  return rows.map(estDesdeDb);
 }
 
 export async function getEstablishment(id) {
-  await delay(200);
-  return read(ESTABLISHMENTS_KEY, []).find((e) => e.id === id) ?? null;
+  const e = await apiFetch(`/api/establecimientos/${id}`);
+  return e ? estDesdeDb(e) : null;
 }
 
+// Crea el establecimiento, sus canchas y los horarios de cada cancha.
 export async function addEstablishment(data) {
-  await delay();
-  const all = read(ESTABLISHMENTS_KEY, []);
-  const record = { ...data, id: uid(), published: true, createdAt: new Date().toISOString() };
-  all.push(record);
-  write(ESTABLISHMENTS_KEY, all);
-  return record;
+  const est = await apiFetch('/api/establecimientos', {
+    method: 'POST',
+    body: {
+      nombre: data.name,
+      descripcion: data.description,
+      direccion: data.direccion,
+      ubicacion_lat: Number(data.lat),
+      ubicacion_lng: Number(data.lng),
+      amenidades: (data.amenities || []).map((id) => AMENIDAD_A_DB[id]).filter(Boolean),
+    },
+  });
+
+  for (const court of data.courts || []) {
+    const cancha = await apiFetch('/api/canchas', {
+      method: 'POST',
+      body: {
+        id_establecimiento: est.id_establecimiento,
+        deporte: DEPORTE_A_DB[court.type] || 'Futbol 5',
+        nombre: court.name || 'Cancha',
+        precio_hora: Number(court.precio),
+      },
+    });
+    for (const dia of court.days || []) {
+      for (const slot of court.slots || []) {
+        await apiFetch(`/api/canchas/${cancha.id_cancha}/horarios`, {
+          method: 'POST',
+          body: { dia_semana: DIA_A_DB[dia], hora_inicio: slot, hora_fin: horaFinDeSlot(slot) },
+        });
+      }
+    }
+  }
+  return { id: est.id_establecimiento };
 }
 
+// Actualiza los datos generales del establecimiento (la edicion de canchas se hace por separado).
 export async function updateEstablishment(id, data) {
-  await delay();
-  const all = read(ESTABLISHMENTS_KEY, []);
-  const idx = all.findIndex((e) => e.id === id);
-  if (idx === -1) throw new Error('Establecimiento no encontrado.');
-  all[idx] = { ...all[idx], ...data, id };
-  write(ESTABLISHMENTS_KEY, all);
-  return all[idx];
+  await apiFetch(`/api/establecimientos/${id}`, {
+    method: 'PUT',
+    body: {
+      nombre: data.name,
+      descripcion: data.description,
+      direccion: data.direccion,
+      ubicacion_lat: data.lat != null && data.lat !== '' ? Number(data.lat) : undefined,
+      ubicacion_lng: data.lng != null && data.lng !== '' ? Number(data.lng) : undefined,
+    },
+  });
+  return { id };
 }
 
 export async function deleteEstablishment(id) {
-  await delay(300);
-  write(
-    ESTABLISHMENTS_KEY,
-    read(ESTABLISHMENTS_KEY, []).filter((e) => e.id !== id),
-  );
+  await apiFetch(`/api/establecimientos/${id}`, { method: 'DELETE' });
 }

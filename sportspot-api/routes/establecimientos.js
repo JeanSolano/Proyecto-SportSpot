@@ -36,18 +36,30 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /api/establecimientos/mios  (Dueno) - los del dueno autenticado
+// GET /api/establecimientos/mios  (Dueno) - los del dueno, con canchas y amenidades
 router.get('/mios', verificarToken, soloRol('Dueno'), async (req, res) => {
   try {
-    const result = await pool.query(
-      `SELECT e.*,
-              (SELECT COUNT(*) FROM canchas c WHERE c.id_establecimiento = e.id_establecimiento) AS canchas
-         FROM establecimientos e
-        WHERE e.id_dueno = $1
-        ORDER BY e.created_at DESC`,
-      [req.usuario.id_usuario],
-    );
-    res.json(result.rows);
+    const ests = (
+      await pool.query('SELECT * FROM establecimientos WHERE id_dueno = $1 ORDER BY created_at DESC', [req.usuario.id_usuario])
+    ).rows;
+    for (const e of ests) {
+      e.canchas = (
+        await pool.query(
+          `SELECT c.id_cancha, c.nombre, c.precio_hora, t.nombre AS deporte
+             FROM canchas c JOIN tipos_deporte t ON t.id_tipo = c.id_tipo_deporte
+            WHERE c.id_establecimiento = $1 ORDER BY c.created_at`,
+          [e.id_establecimiento],
+        )
+      ).rows;
+      e.amenidades = (
+        await pool.query(
+          `SELECT a.nombre FROM establecimiento_amenidades ea
+             JOIN amenidades a ON a.id_amenidad = ea.id_amenidad WHERE ea.id_establecimiento = $1`,
+          [e.id_establecimiento],
+        )
+      ).rows.map((r) => r.nombre);
+    }
+    res.json(ests);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Error al obtener tus establecimientos' });
@@ -71,6 +83,15 @@ router.get('/:id', async (req, res) => {
         WHERE c.id_establecimiento = $1 ORDER BY c.created_at`,
       [req.params.id],
     );
+    for (const c of canchas.rows) {
+      c.horarios = (
+        await pool.query(
+          `SELECT dia_semana, hora_inicio, hora_fin, bloqueado FROM cancha_horarios
+            WHERE id_cancha = $1 ORDER BY dia_semana, hora_inicio`,
+          [c.id_cancha],
+        )
+      ).rows;
+    }
     const amenidades = await pool.query(
       `SELECT a.id_amenidad, a.nombre, a.icono
          FROM establecimiento_amenidades ea JOIN amenidades a ON a.id_amenidad = ea.id_amenidad
@@ -94,6 +115,9 @@ router.post('/', verificarToken, soloRol('Dueno'), async (req, res) => {
   const { nombre, descripcion, direccion, ubicacion_lat, ubicacion_lng, telefono, correo, amenidades } = req.body;
   if (!nombre || !direccion || ubicacion_lat == null || ubicacion_lng == null) {
     return res.status(400).json({ error: 'nombre, direccion y ubicacion (lat/lng) son obligatorios' });
+  }
+  if (Math.abs(Number(ubicacion_lat)) > 90 || Math.abs(Number(ubicacion_lng)) > 180) {
+    return res.status(400).json({ error: 'La latitud debe estar entre -90 y 90 y la longitud entre -180 y 180' });
   }
   const client = await pool.connect();
   try {
@@ -122,7 +146,13 @@ router.post('/', verificarToken, soloRol('Dueno'), async (req, res) => {
     );
     const est = insert.rows[0];
     if (Array.isArray(amenidades)) {
-      for (const idA of amenidades) {
+      for (const a of amenidades) {
+        let idA = a;
+        if (typeof a === 'string') {
+          const found = await client.query('SELECT id_amenidad FROM amenidades WHERE LOWER(nombre) = LOWER($1)', [a]);
+          if (found.rowCount === 0) continue;
+          idA = found.rows[0].id_amenidad;
+        }
         await client.query(
           'INSERT INTO establecimiento_amenidades (id_establecimiento, id_amenidad) VALUES ($1, $2) ON CONFLICT DO NOTHING',
           [est.id_establecimiento, idA],

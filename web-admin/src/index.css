@@ -305,6 +305,16 @@ h3 { font-size: 18px; font-weight: 600; }
 .slot.on { background: var(--primary); border-color: var(--primary); color: #fff; }
 .days-row { display: flex; flex-wrap: wrap; gap: 8px; }
 
+/* ---- Formulario de establecimiento: encabezado de proceso ---- */
+.form-hero { padding: 20px 22px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 16px; }
+.form-hero-main { display: flex; align-items: center; gap: 14px; }
+.form-hero-main h3 { color: var(--navy); font-size: 18px; }
+.form-hero-main p { color: var(--text-secondary); font-size: 14px; margin-top: 2px; }
+.form-steps { display: flex; flex-wrap: wrap; gap: 8px; }
+.form-step { display: inline-flex; align-items: center; gap: 8px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-full); padding: 6px 14px 6px 6px; font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+.form-step-n { width: 22px; height: 22px; border-radius: 50%; background: var(--gradient-button); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+.form-footer { display: flex; gap: 12px; justify-content: flex-end; position: sticky; bottom: 0; background: linear-gradient(to top, var(--bg) 72%, transparent); padding: 16px 0 8px; margin-top: 4px; }
+
 /* =========================================================================
    Sitio público (landing + planes)
    ========================================================================= */

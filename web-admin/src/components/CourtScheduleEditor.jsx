@@ -55,6 +55,21 @@ export default function CourtScheduleEditor({ index, court, onChange, onRemove }
         </div>
       </div>
 
+      <div className="field" style={{ marginTop: 14, marginBottom: 0, maxWidth: 220 }}>
+        <label>
+          Precio por hora (USD) <span className="req">*</span>
+        </label>
+        <input
+          className="input"
+          type="number"
+          min="1"
+          step="0.5"
+          placeholder="15.00"
+          value={court.precio ?? ''}
+          onChange={(e) => update({ precio: e.target.value })}
+        />
+      </div>
+
       <div style={{ marginTop: 16 }}>
         <label className="tiny" style={{ fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>
           Días disponibles
