@@ -598,6 +598,11 @@ h3 { font-size: 18px; font-weight: 600; }
   .agenda-time { min-width: 0; }
 }
 
+/* ---- Mi cuenta ---- */
+.account-meta { display: flex; gap: 40px; flex-wrap: wrap; margin-top: 8px; }
+.account-meta > div { display: flex; flex-direction: column; gap: 2px; }
+.account-meta strong { text-transform: capitalize; }
+
 /* ---- Respeta motion reducido ---- */
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1; transform: none; }

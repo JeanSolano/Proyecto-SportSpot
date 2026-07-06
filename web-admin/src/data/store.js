@@ -78,6 +78,32 @@ export function getCurrentOwner() {
   return read(OWNER_KEY, null);
 }
 
+// Perfil fresco desde el API (nombre, correo, teléfono, rol, alta).
+export async function getProfile() {
+  const u = await apiFetch('/api/usuarios/perfil');
+  return {
+    ...mapOwner(u),
+    createdAt: u.created_at,
+  };
+}
+
+// Actualiza el perfil (y opcionalmente la contraseña). Refresca el owner cacheado.
+export async function updateProfile({ name, email, phone, currentPassword, newPassword }) {
+  const data = await apiFetch('/api/usuarios/perfil', {
+    method: 'PUT',
+    body: {
+      nombre: name,
+      correo: email,
+      telefono: phone,
+      contrasena_actual: currentPassword || undefined,
+      contrasena_nueva: newPassword || undefined,
+    },
+  });
+  const owner = mapOwner(data);
+  write(OWNER_KEY, owner);
+  return owner;
+}
+
 // ---------------------------------------------------------------------------
 // Suscripción  (/api/suscripciones)
 // ---------------------------------------------------------------------------

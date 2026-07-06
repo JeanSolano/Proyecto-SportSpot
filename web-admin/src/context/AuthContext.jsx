@@ -31,13 +31,19 @@ export function AuthProvider({ children }) {
     return o;
   };
 
+  const updateProfile = async (data) => {
+    const o = await store.updateProfile(data);
+    setOwner(o);
+    return o;
+  };
+
   const logout = () => {
     store.logout();
     setOwner(null);
   };
 
   return (
-    <AuthContext.Provider value={{ owner, isAuthenticated: !!owner, loading, login, register, loginGoogle, logout }}>
+    <AuthContext.Provider value={{ owner, isAuthenticated: !!owner, loading, login, register, loginGoogle, updateProfile, logout }}>
       {children}
     </AuthContext.Provider>
   );
