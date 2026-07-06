@@ -1,21 +1,38 @@
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import EstablishmentDetailModal from '@/components/establishment-detail-modal';
 import ExploreModal from '@/components/explore-modal';
+import PostModal from '@/components/post-modal';
 import { BorderRadius, Shadows, Spacing, Typography } from '@/constants/theme';
-import { FEED, type FeedItem } from '@/data/mock-feed';
+import { getEstablecimientos } from '@/data/establecimientos';
+import { buildEstablecimientoPosts, mezclarFeed, USER_POSTS, type FeedItem } from '@/data/mock-feed';
 import { useTheme } from '@/hooks/use-theme';
 
-// ─── Tarjeta del feed (publicación / evento) ──────────────────────────────────
-function FeedCard({ item, liked, onLike }: { item: FeedItem; liked: boolean; onLike: () => void }) {
+// ─── Tarjeta del feed ─────────────────────────────────────────────────────────
+function FeedCard({
+  item,
+  liked,
+  onLike,
+  onPress,
+}: {
+  item: FeedItem;
+  liked: boolean;
+  onLike: () => void;
+  onPress: () => void;
+}) {
   const theme = useTheme();
-  const esEvento = item.tipo === 'evento';
+  const esEstablecimiento = item.tipoAutor === 'establecimiento';
 
   return (
-    <View style={[styles.card, { backgroundColor: theme.surface }, Shadows.card]}>
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.card, { backgroundColor: theme.surface, opacity: pressed ? 0.96 : 1 }, Shadows.card]}
+      accessibilityRole="button"
+      accessibilityLabel={`Abrir publicación de ${item.autor}`}>
       {/* Autor */}
       <View style={styles.authorRow}>
         <View style={[styles.avatar, { backgroundColor: item.autorColor }]}>
@@ -23,9 +40,11 @@ function FeedCard({ item, liked, onLike }: { item: FeedItem; liked: boolean; onL
         </View>
         <View style={{ flex: 1 }}>
           <Text style={[styles.author, { color: theme.text }]} numberOfLines={1}>{item.autor}</Text>
-          <Text style={[styles.time, { color: theme.textTertiary }]}>{item.tiempo}</Text>
+          <Text style={[styles.time, { color: theme.textTertiary }]}>
+            {esEstablecimiento ? 'Establecimiento' : 'Deportista'} · {item.tiempo}
+          </Text>
         </View>
-        {esEvento && (
+        {item.esEvento && (
           <View style={[styles.typeBadge, { backgroundColor: theme.backgroundSelected }]}>
             <Text style={[styles.typeBadgeText, { color: theme.primary }]}>Evento</Text>
           </View>
@@ -35,10 +54,12 @@ function FeedCard({ item, liked, onLike }: { item: FeedItem; liked: boolean; onL
       {/* Imagen */}
       <View style={styles.imageWrap}>
         <Image source={{ uri: item.imagen }} style={styles.image} contentFit="cover" transition={250} />
-        <View style={[styles.sportBadge, { backgroundColor: item.deporteColor }]}>
-          <Text style={styles.sportBadgeText}>{item.deporte}</Text>
-        </View>
-        {esEvento && item.fechaEvento && (
+        {item.deporte && (
+          <View style={[styles.sportBadge, { backgroundColor: item.deporteColor || theme.primary }]}>
+            <Text style={styles.sportBadgeText}>{item.deporte}</Text>
+          </View>
+        )}
+        {item.esEvento && item.fechaEvento && (
           <LinearGradient colors={['transparent', 'rgba(0,0,0,0.7)']} style={styles.dateOverlay}>
             <Text style={styles.dateText}>📅 {item.fechaEvento}</Text>
           </LinearGradient>
@@ -47,8 +68,7 @@ function FeedCard({ item, liked, onLike }: { item: FeedItem; liked: boolean; onL
 
       {/* Contenido */}
       <View style={styles.content}>
-        <Text style={[styles.title, { color: theme.text }]}>{item.titulo}</Text>
-        <Text style={[styles.desc, { color: theme.textSecondary }]}>{item.descripcion}</Text>
+        <Text style={[styles.text, { color: theme.text }]} numberOfLines={2}>{item.texto}</Text>
 
         <View style={styles.footer}>
           <Pressable onPress={onLike} hitSlop={8} style={styles.footerBtn} accessibilityRole="button" accessibilityLabel="Me gusta">
@@ -59,9 +79,12 @@ function FeedCard({ item, liked, onLike }: { item: FeedItem; liked: boolean; onL
             <Text style={[styles.footerIcon, { color: theme.textSecondary }]}>💬</Text>
             <Text style={[styles.footerText, { color: theme.textSecondary }]}>{item.comentarios}</Text>
           </View>
+          {esEstablecimiento && (
+            <Text style={[styles.verMas, { color: theme.primary }]}>Ver perfil ›</Text>
+          )}
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -69,10 +92,26 @@ function FeedCard({ item, liked, onLike }: { item: FeedItem; liked: boolean; onL
 export default function HomeScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+
   const [likes, setLikes] = useState<Record<string, boolean>>({});
   const [explore, setExplore] = useState(false);
+  const [post, setPost] = useState<FeedItem | null>(null);
+  const [detailId, setDetailId] = useState<string | null>(null);
+  const [estPosts, setEstPosts] = useState<FeedItem[]>([]);
+
+  // Publicaciones de los establecimientos reales de la BD.
+  useEffect(() => {
+    let cancelado = false;
+    getEstablecimientos()
+      .then((list) => { if (!cancelado) setEstPosts(buildEstablecimientoPosts(list)); })
+      .catch(() => {});
+    return () => { cancelado = true; };
+  }, []);
+
+  const feed = useMemo(() => (estPosts.length ? mezclarFeed(estPosts) : USER_POSTS), [estPosts]);
 
   const toggleLike = (id: string) => setLikes((p) => ({ ...p, [id]: !p[id] }));
+  const verPerfil = (id: string) => { setPost(null); setDetailId(id); };
 
   const header = (
     <View>
@@ -83,7 +122,7 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      {/* Botón de buscar -> pantalla de establecimientos reales */}
+      {/* Botón de buscar -> establecimientos reales */}
       <Pressable
         onPress={() => setExplore(true)}
         style={[styles.searchBar, { backgroundColor: theme.inputBackground, borderColor: theme.border }]}
@@ -100,14 +139,23 @@ export default function HomeScreen() {
   return (
     <View style={[styles.screen, { backgroundColor: theme.background }]}>
       <FlatList
-        data={FEED}
+        data={feed}
         keyExtractor={(f) => f.id}
         ListHeaderComponent={header}
-        renderItem={({ item }) => <FeedCard item={item} liked={!!likes[item.id]} onLike={() => toggleLike(item.id)} />}
+        renderItem={({ item }) => (
+          <FeedCard
+            item={item}
+            liked={!!likes[item.id]}
+            onLike={() => toggleLike(item.id)}
+            onPress={() => setPost(item)}
+          />
+        )}
         contentContainerStyle={[styles.list, { paddingBottom: insets.bottom + Spacing.six }]}
         showsVerticalScrollIndicator={false}
       />
 
+      <PostModal post={post} onClose={() => setPost(null)} onVerPerfil={verPerfil} />
+      <EstablishmentDetailModal id={detailId} onClose={() => setDetailId(null)} />
       <ExploreModal visible={explore} onClose={() => setExplore(false)} />
     </View>
   );
@@ -132,7 +180,6 @@ const styles = StyleSheet.create({
   searchPlaceholder: { ...Typography.body },
 
   feedTitle: { ...Typography.heading, paddingHorizontal: Spacing.three, paddingTop: Spacing.three, paddingBottom: Spacing.one },
-
   list: { paddingTop: Spacing.two, gap: Spacing.three, paddingHorizontal: Spacing.three },
 
   // Card
@@ -153,10 +200,10 @@ const styles = StyleSheet.create({
   dateText: { ...Typography.bodyBold, color: '#fff' },
 
   content: { padding: Spacing.three, gap: Spacing.two },
-  title: { ...Typography.subheading },
-  desc: { ...Typography.body, lineHeight: 21 },
-  footer: { flexDirection: 'row', gap: Spacing.four, marginTop: Spacing.one },
+  text: { ...Typography.body, lineHeight: 21 },
+  footer: { flexDirection: 'row', alignItems: 'center', gap: Spacing.four, marginTop: Spacing.one },
   footerBtn: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   footerIcon: { fontSize: 18 },
   footerText: { ...Typography.caption },
+  verMas: { ...Typography.bodyBold, marginLeft: 'auto' },
 });
