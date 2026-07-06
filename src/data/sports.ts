@@ -9,3 +9,8 @@ export function sportColor(name: string): string {
   if (n.includes('nataci')) return '#00B8D4';
   return '#1E7FE0';
 }
+
+// Etiqueta bonita para mostrar (los nombres de la BD vienen sin acento).
+export function sportLabel(name: string): string {
+  return name.replace(/f[uú]tbol/i, 'Fútbol');
+}
