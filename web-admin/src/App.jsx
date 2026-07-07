@@ -9,6 +9,7 @@ import Checkout from './pages/Checkout.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Subscription from './pages/Subscription.jsx';
 import Account from './pages/Account.jsx';
+import Establishments from './pages/Establishments.jsx';
 import EstablishmentForm from './pages/EstablishmentForm.jsx';
 import EstablishmentDetail from './pages/EstablishmentDetail.jsx';
 
@@ -48,6 +49,7 @@ export default function App() {
         <Route path="/panel" element={<Dashboard />} />
         <Route path="/suscripcion" element={<Subscription />} />
         <Route path="/cuenta" element={<Account />} />
+        <Route path="/establecimientos" element={<Establishments />} />
         <Route path="/establecimientos/nuevo" element={<EstablishmentForm />} />
         <Route path="/establecimientos/:id" element={<EstablishmentDetail />} />
         <Route path="/establecimientos/:id/editar" element={<EstablishmentForm />} />

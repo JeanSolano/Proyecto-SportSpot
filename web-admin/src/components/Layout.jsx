@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, PlusCircle, CreditCard, LogOut, UserCog } from 'lucide-react';
+import { LayoutDashboard, Building2, CreditCard, LogOut, UserCog } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 
 const initials = (name = '') =>
@@ -28,8 +28,8 @@ export default function Layout() {
           <NavLink to="/panel" end className={navClass}>
             <LayoutDashboard className="lucide" /> Dashboard
           </NavLink>
-          <NavLink to="/establecimientos/nuevo" className={navClass}>
-            <PlusCircle className="lucide" /> Nuevo establecimiento
+          <NavLink to="/establecimientos" end className={navClass}>
+            <Building2 className="lucide" /> Establecimientos
           </NavLink>
           <NavLink to="/suscripcion" className={navClass}>
             <CreditCard className="lucide" /> Suscripción

@@ -598,6 +598,27 @@ h3 { font-size: 18px; font-weight: 600; }
   .agenda-time { min-width: 0; }
 }
 
+/* ---- Establecimientos: banners de plan ---- */
+.plan-callout { display: flex; align-items: center; gap: 16px; padding: 20px 22px; border-radius: var(--radius-lg); margin-bottom: 22px; background: var(--surface); box-shadow: var(--shadow-sm); }
+.plan-callout .icon-badge { width: 48px; height: 48px; flex: none; }
+.plan-callout-text { flex: 1; min-width: 0; }
+.plan-callout-text h3 { color: var(--navy); margin-bottom: 3px; }
+.plan-callout.at-limit { background: linear-gradient(120deg, rgba(30,127,224,0.08), rgba(27,40,128,0.08)); border: 1px solid var(--border); }
+.plan-callout.no-plan { border-left: 4px solid var(--accent); }
+.plan-usage { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: var(--radius-md); background: var(--selected); margin-bottom: 22px; font-size: 14px; }
+.plan-usage .lucide { width: 18px; height: 18px; flex: none; }
+.plan-usage > span { flex: 1; }
+@media (max-width: 620px) { .plan-callout, .plan-usage { flex-direction: column; align-items: flex-start; } }
+
+/* ---- Tarjeta de establecimiento: encabezado con editar ---- */
+.estab-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.estab-card-head h3 { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.estab-edit { flex: none; }
+
+/* ---- Plan actual (página de planes) ---- */
+.plan-card.current { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary) inset, var(--shadow-md); }
+.plan-tag.current-tag { background: var(--primary); }
+
 /* ---- Mi cuenta ---- */
 .account-meta { display: flex; gap: 40px; flex-wrap: wrap; margin-top: 8px; }
 .account-meta > div { display: flex; flex-direction: column; gap: 2px; }
