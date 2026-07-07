@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
     }
     const result = await pool.query(
       `SELECT e.id_establecimiento, e.nombre, e.descripcion, e.direccion,
-              e.ubicacion_lat, e.ubicacion_lng, e.estado, u.nombre AS dueno,
+              e.ubicacion_lat, e.ubicacion_lng, e.estado, e.logo_url, u.nombre AS dueno,
               COUNT(DISTINCT c.id_cancha)          AS canchas,
               MIN(c.precio_hora)                   AS precio_desde,
               COALESCE(
@@ -115,7 +115,18 @@ router.get('/:id', async (req, res) => {
         WHERE id_establecimiento = $1 ORDER BY dia_semana`,
       [req.params.id],
     );
-    res.json({ ...est.rows[0], canchas: canchas.rows, amenidades: amenidades.rows, horario_operacion: horario.rows });
+    const imagenes = await pool.query(
+      `SELECT id_imagen, url, es_principal, orden FROM establecimiento_imagenes
+        WHERE id_establecimiento = $1 ORDER BY orden, created_at`,
+      [req.params.id],
+    );
+    res.json({
+      ...est.rows[0],
+      canchas: canchas.rows,
+      amenidades: amenidades.rows,
+      horario_operacion: horario.rows,
+      imagenes: imagenes.rows,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Error al obtener el establecimiento' });
@@ -217,6 +228,67 @@ router.delete('/:id', verificarToken, soloRol('Dueno'), async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Error al eliminar el establecimiento' });
+  }
+});
+
+// Verifica que el establecimiento exista y sea del dueno autenticado.
+async function verificarDueno(idEst, idUsuario) {
+  const r = await pool.query('SELECT id_dueno FROM establecimientos WHERE id_establecimiento = $1', [idEst]);
+  if (r.rowCount === 0) return 'no-existe';
+  return r.rows[0].id_dueno === idUsuario ? 'ok' : 'ajeno';
+}
+function responderChequeo(chk, res) {
+  if (chk === 'no-existe') { res.status(404).json({ error: 'Establecimiento no encontrado' }); return true; }
+  if (chk === 'ajeno') { res.status(403).json({ error: 'Este establecimiento no es tuyo' }); return true; }
+  return false;
+}
+
+// PUT /api/establecimientos/:id/logo  body { logo }  (data URL base64 o URL; null para quitar)
+router.put('/:id/logo', verificarToken, soloRol('Dueno'), async (req, res) => {
+  try {
+    if (responderChequeo(await verificarDueno(req.params.id, req.usuario.id_usuario), res)) return;
+    const upd = await pool.query(
+      'UPDATE establecimientos SET logo_url = $2, updated_at = NOW() WHERE id_establecimiento = $1 RETURNING logo_url',
+      [req.params.id, req.body.logo || null],
+    );
+    res.json({ logo_url: upd.rows[0].logo_url });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al guardar el logo' });
+  }
+});
+
+// POST /api/establecimientos/:id/imagenes  body { url, es_principal? }
+router.post('/:id/imagenes', verificarToken, soloRol('Dueno'), async (req, res) => {
+  const { url, es_principal } = req.body;
+  if (!url) return res.status(400).json({ error: 'url es obligatoria' });
+  try {
+    if (responderChequeo(await verificarDueno(req.params.id, req.usuario.id_usuario), res)) return;
+    const ins = await pool.query(
+      `INSERT INTO establecimiento_imagenes (id_establecimiento, url, es_principal, orden)
+       VALUES ($1, $2, $3, COALESCE((SELECT MAX(orden) + 1 FROM establecimiento_imagenes WHERE id_establecimiento = $1), 0))
+       RETURNING id_imagen, url, es_principal, orden`,
+      [req.params.id, url, !!es_principal],
+    );
+    res.status(201).json(ins.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al guardar la imagen' });
+  }
+});
+
+// DELETE /api/establecimientos/:id/imagenes/:idImg
+router.delete('/:id/imagenes/:idImg', verificarToken, soloRol('Dueno'), async (req, res) => {
+  try {
+    if (responderChequeo(await verificarDueno(req.params.id, req.usuario.id_usuario), res)) return;
+    await pool.query(
+      'DELETE FROM establecimiento_imagenes WHERE id_imagen = $1 AND id_establecimiento = $2',
+      [req.params.idImg, req.params.id],
+    );
+    res.json({ mensaje: 'Imagen eliminada' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al eliminar la imagen' });
   }
 });
 

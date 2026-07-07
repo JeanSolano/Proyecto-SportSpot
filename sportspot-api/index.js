@@ -7,7 +7,7 @@ require('./config/db'); // inicializa el pool y verifica la conexion
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); // permite imagenes en base64 (logo/fotos)
 
 // Ruta raiz de salud
 app.get('/', (req, res) => {

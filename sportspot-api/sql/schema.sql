@@ -23,6 +23,7 @@ DROP TABLE IF EXISTS cancha_imagenes CASCADE;
 DROP TABLE IF EXISTS cancha_horarios CASCADE;
 DROP TABLE IF EXISTS canchas CASCADE;
 DROP TABLE IF EXISTS horarios_operacion CASCADE;
+DROP TABLE IF EXISTS establecimiento_imagenes CASCADE;
 DROP TABLE IF EXISTS establecimiento_amenidades CASCADE;
 DROP TABLE IF EXISTS establecimientos CASCADE;
 DROP TABLE IF EXISTS suscripciones CASCADE;
@@ -121,6 +122,7 @@ CREATE TABLE establecimientos (
   ubicacion_lng       DECIMAL(10,7) NOT NULL,
   telefono            VARCHAR(20),
   correo              VARCHAR(150),
+  logo_url            TEXT,                                       -- data URL (base64) o URL del logo
   estado              VARCHAR(20) NOT NULL DEFAULT 'pendiente',   -- activo | inactivo | pendiente
   created_at          TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at          TIMESTAMP NOT NULL DEFAULT NOW()
@@ -133,6 +135,17 @@ CREATE TABLE establecimiento_amenidades (
   notas               VARCHAR(200),
   PRIMARY KEY (id_establecimiento, id_amenidad)
 );
+
+-- Galeria de fotos del establecimiento (data URL base64 o URL)
+CREATE TABLE establecimiento_imagenes (
+  id_imagen           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id_establecimiento  UUID NOT NULL REFERENCES establecimientos(id_establecimiento) ON DELETE CASCADE,
+  url                 TEXT NOT NULL,
+  es_principal        BOOLEAN NOT NULL DEFAULT FALSE,
+  orden               INTEGER NOT NULL DEFAULT 0,
+  created_at          TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE INDEX idx_estab_imagenes ON establecimiento_imagenes (id_establecimiento);
 
 -- Horario de operacion del establecimiento (apertura/cierre por dia)
 CREATE TABLE horarios_operacion (

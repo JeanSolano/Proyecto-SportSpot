@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "migrate": "node migrate.js"
+    "migrate": "node migrate.js",
+    "migrate:imagenes": "node migrate-imagenes.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
