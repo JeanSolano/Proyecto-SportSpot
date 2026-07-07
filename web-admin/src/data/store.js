@@ -199,10 +199,28 @@ const estDesdeDb = (e) => ({
   direccion: e.direccion || '',
   lat: e.ubicacion_lat,
   lng: e.ubicacion_lng,
+  logo: e.logo_url || null,
+  photos: (e.imagenes || []).map((i) => ({ id: i.id_imagen, url: i.url })),
   amenities: (e.amenidades || []).map(amenidadDesdeDb).filter(Boolean),
   courts: (e.canchas || []).map(canchaDesdeDb),
   published: e.estado === 'activo',
 });
+
+// --- Logo y galería de fotos del establecimiento ---
+export async function uploadLogo(id, dataUrl) {
+  const r = await apiFetch(`/api/establecimientos/${id}/logo`, { method: 'PUT', body: { logo: dataUrl } });
+  return r.logo_url;
+}
+export async function removeLogo(id) {
+  await apiFetch(`/api/establecimientos/${id}/logo`, { method: 'PUT', body: { logo: null } });
+}
+export async function addPhoto(id, dataUrl) {
+  const r = await apiFetch(`/api/establecimientos/${id}/imagenes`, { method: 'POST', body: { url: dataUrl } });
+  return { id: r.id_imagen, url: r.url };
+}
+export async function removePhoto(id, idImg) {
+  await apiFetch(`/api/establecimientos/${id}/imagenes/${idImg}`, { method: 'DELETE' });
+}
 
 export async function getEstablishments() {
   const rows = await apiFetch('/api/establecimientos/mios');

@@ -1,3 +1,4 @@
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -34,7 +35,7 @@ function EstablecimientoCard({ item, onPress }: { item: EstablecimientoResumen; 
       accessibilityRole="button"
       accessibilityLabel={`Ver ${item.nombre}`}>
       <LinearGradient colors={[accent, '#1B2880']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
-        <Text style={styles.heroWatermark} numberOfLines={1}>{initials(item.nombre)}</Text>
+        {!item.logo && <Text style={styles.heroWatermark} numberOfLines={1}>{initials(item.nombre)}</Text>}
         <View style={styles.heroTopRow}>
           {mainSport ? (
             <View style={styles.heroBadge}><Text style={styles.heroBadgeText}>{sportLabel(mainSport)}</Text></View>
@@ -43,9 +44,16 @@ function EstablecimientoCard({ item, onPress }: { item: EstablecimientoResumen; 
             <View style={styles.availBadge}><Text style={styles.availText}>Disponible hoy</Text></View>
           )}
         </View>
-        <View>
-          <Text style={styles.heroName} numberOfLines={1}>{item.nombre}</Text>
-          <Text style={styles.heroAddress} numberOfLines={1}>{item.direccion}</Text>
+        <View style={styles.heroNameRow}>
+          {item.logo && (
+            <View style={styles.logoCircle}>
+              <Image source={{ uri: item.logo }} style={styles.logoImg} contentFit="cover" />
+            </View>
+          )}
+          <View style={{ flex: 1 }}>
+            <Text style={styles.heroName} numberOfLines={1}>{item.nombre}</Text>
+            <Text style={styles.heroAddress} numberOfLines={1}>{item.direccion}</Text>
+          </View>
         </View>
       </LinearGradient>
 
@@ -257,6 +265,9 @@ const styles = StyleSheet.create({
   availText: { ...Typography.badge, color: '#0A7B34' },
   heroName: { ...Typography.heading, color: '#fff' },
   heroAddress: { ...Typography.caption, color: 'rgba(255,255,255,0.9)', marginTop: 2 },
+  heroNameRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
+  logoCircle: { width: 44, height: 44, borderRadius: BorderRadius.full, overflow: 'hidden', backgroundColor: '#fff', borderWidth: 2, borderColor: 'rgba(255,255,255,0.7)' },
+  logoImg: { width: '100%', height: '100%' },
   cardBody: { padding: Spacing.three, gap: Spacing.two },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.one },
   chip: { paddingHorizontal: Spacing.two, paddingVertical: 4, borderRadius: BorderRadius.sm },

@@ -1,3 +1,4 @@
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -15,7 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BorderRadius, Shadows, Spacing, Typography } from '@/constants/theme';
 import { getEstablecimiento, type Cancha, type EstablecimientoDetalle } from '@/data/establecimientos';
-import { sportColor } from '@/data/sports';
+import { sportColor, sportLabel } from '@/data/sports';
 import { useTheme } from '@/hooks/use-theme';
 import ReservaModal from './reserva-modal';
 
@@ -120,14 +121,23 @@ export default function EstablishmentDetailModal({
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={[st.hero, { paddingTop: insets.top + Spacing.six }]}>
-                <Text style={st.heroWatermark} numberOfLines={1}>{initials(data.nombre)}</Text>
+                {!data.logo && <Text style={st.heroWatermark} numberOfLines={1}>{initials(data.nombre)}</Text>}
                 <View style={st.heroBadges}>
-                  {mainSport && <View style={st.sportBadge}><Text style={st.sportBadgeText}>{mainSport}</Text></View>}
+                  {mainSport && <View style={st.sportBadge}><Text style={st.sportBadgeText}>{sportLabel(mainSport)}</Text></View>}
                   {abiertoHoy && <View style={st.availBadge}><Text style={st.availText}>Disponible hoy</Text></View>}
                 </View>
-                <Text style={st.heroName}>{data.nombre}</Text>
-                <Text style={st.heroAddress}>{data.direccion}</Text>
-                <Text style={st.heroOwner}>por {data.dueno}</Text>
+                <View style={st.heroTitleRow}>
+                  {data.logo && (
+                    <View style={st.logoCircle}>
+                      <Image source={{ uri: data.logo }} style={st.logoImg} contentFit="cover" />
+                    </View>
+                  )}
+                  <View style={{ flex: 1 }}>
+                    <Text style={st.heroName}>{data.nombre}</Text>
+                    <Text style={st.heroAddress}>{data.direccion}</Text>
+                    <Text style={st.heroOwner}>por {data.dueno}</Text>
+                  </View>
+                </View>
               </LinearGradient>
 
               {/* Tira de stats reales */}
@@ -136,6 +146,18 @@ export default function EstablishmentDetailModal({
                 <Stat value={precioDesde != null ? `$${precioDesde.toFixed(0)}` : '—'} label="Desde /h" theme={theme} accent />
                 <Stat value={String(deportesUnicos.length)} label={deportesUnicos.length === 1 ? 'Deporte' : 'Deportes'} theme={theme} />
               </View>
+
+              {/* Galería de fotos */}
+              {data.imagenes.length > 0 && (
+                <View style={st.gallerySection}>
+                  <Text style={[st.sectionTitle, { color: theme.text }]}>Fotos</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={st.galleryRow}>
+                    {data.imagenes.map((img) => (
+                      <Image key={img.id} source={{ uri: img.url }} style={st.galleryImg} contentFit="cover" transition={200} />
+                    ))}
+                  </ScrollView>
+                </View>
+              )}
 
               <View style={st.body}>
                 {/* Contacto */}
@@ -288,6 +310,13 @@ const st = StyleSheet.create({
   heroName: { ...Typography.displayMd, color: '#fff' },
   heroAddress: { ...Typography.body, color: 'rgba(255,255,255,0.92)' },
   heroOwner: { ...Typography.caption, color: 'rgba(255,255,255,0.8)', marginTop: 2 },
+  heroTitleRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
+  logoCircle: { width: 54, height: 54, borderRadius: BorderRadius.full, overflow: 'hidden', backgroundColor: '#fff', borderWidth: 2, borderColor: 'rgba(255,255,255,0.7)' },
+  logoImg: { width: '100%', height: '100%' },
+
+  gallerySection: { paddingLeft: Spacing.three, marginTop: Spacing.four, gap: Spacing.two },
+  galleryRow: { gap: Spacing.two, paddingRight: Spacing.three },
+  galleryImg: { width: 180, height: 130, borderRadius: BorderRadius.md },
 
   statsRow: { flexDirection: 'row', gap: Spacing.two, paddingHorizontal: Spacing.three, marginTop: -Spacing.four },
   statCard: { flex: 1, alignItems: 'center', paddingVertical: Spacing.three, borderRadius: BorderRadius.md, gap: 2 },

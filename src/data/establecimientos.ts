@@ -14,6 +14,7 @@ export interface EstablecimientoResumen {
   precio_desde: number | null;
   deportes: string[];
   abierto_hoy: boolean;
+  logo: string | null;
 }
 
 // ─── Detalle (perfil del establecimiento) ─────────────────────────────────────
@@ -45,6 +46,8 @@ export interface EstablecimientoDetalle {
   correo: string | null;
   estado: string;
   dueno: string;
+  logo: string | null;
+  imagenes: { id: string; url: string }[];
   canchas: Cancha[];
   amenidades: Amenidad[];
   horario_operacion: HorarioOperacion[];
@@ -64,6 +67,8 @@ export async function getEstablecimiento(id: string): Promise<EstablecimientoDet
     correo: e.correo ?? null,
     estado: e.estado,
     dueno: e.dueno,
+    logo: e.logo_url ?? null,
+    imagenes: (e.imagenes || []).map((i: any) => ({ id: i.id_imagen, url: i.url })),
     canchas: (e.canchas || []).map((c: any) => ({
       id_cancha: c.id_cancha,
       nombre: c.nombre,
@@ -103,5 +108,6 @@ export async function getEstablecimientos(q?: string): Promise<EstablecimientoRe
     precio_desde: e.precio_desde != null ? Number(e.precio_desde) : null,
     deportes: Array.isArray(e.deportes) ? e.deportes : [],
     abierto_hoy: !!e.abierto_hoy,
+    logo: e.logo_url ?? null,
   }));
 }
