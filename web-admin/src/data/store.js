@@ -222,60 +222,6 @@ export async function removePhoto(id, idImg) {
   await apiFetch(`/api/establecimientos/${id}/imagenes/${idImg}`, { method: 'DELETE' });
 }
 
-// ---------------------------------------------------------------------------
-// Publicaciones del feed  (/api/publicaciones)
-// ---------------------------------------------------------------------------
-
-const postDesdeDb = (p) => ({
-  id: p.id_publicacion,
-  establishmentId: p.id_establecimiento,
-  establishment: p.establecimiento,
-  type: p.tipo,
-  title: p.titulo,
-  description: p.descripcion || '',
-  image: p.imagen || null,
-  eventDate: p.fecha_evento || null,
-  active: p.activo,
-  createdAt: p.created_at,
-});
-
-export async function getMyPosts() {
-  const rows = await apiFetch('/api/publicaciones/mias');
-  return rows.map(postDesdeDb);
-}
-
-export async function createPost({ establishmentId, type, title, description, image, eventDate }) {
-  const p = await apiFetch('/api/publicaciones', {
-    method: 'POST',
-    body: {
-      id_establecimiento: establishmentId,
-      tipo: type,
-      titulo: title,
-      descripcion: description,
-      imagen: image || undefined,
-      fecha_evento: eventDate || undefined,
-    },
-  });
-  return postDesdeDb(p);
-}
-
-export async function updatePost(id, { type, title, description, image, eventDate }) {
-  await apiFetch(`/api/publicaciones/${id}`, {
-    method: 'PUT',
-    body: {
-      tipo: type,
-      titulo: title,
-      descripcion: description,
-      imagen: image || undefined,
-      fecha_evento: eventDate || undefined,
-    },
-  });
-}
-
-export async function deletePost(id) {
-  await apiFetch(`/api/publicaciones/${id}`, { method: 'DELETE' });
-}
-
 export async function getEstablishments() {
   const rows = await apiFetch('/api/establecimientos/mios');
   return rows.map(estDesdeDb);

@@ -4,10 +4,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import ComposePostModal from '@/components/compose-post-modal';
 import EstablishmentDetailModal from '@/components/establishment-detail-modal';
 import ExploreModal from '@/components/explore-modal';
 import PostModal from '@/components/post-modal';
 import { BorderRadius, Shadows, Spacing, Typography } from '@/constants/theme';
+import { useAuth } from '@/context/auth';
 import { mezclarFeed, USER_POSTS, type FeedItem } from '@/data/mock-feed';
 import { getFeedPublicaciones } from '@/data/publicaciones';
 import { sportLabel } from '@/data/sports';
@@ -101,20 +103,19 @@ export default function HomeScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
+  const { usuario } = useAuth();
+  const esDueno = usuario?.rol === 'Dueno';
+
   const [likes, setLikes] = useState<Record<string, boolean>>({});
   const [explore, setExplore] = useState(false);
+  const [compose, setCompose] = useState(false);
   const [post, setPost] = useState<FeedItem | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
   const [estPosts, setEstPosts] = useState<FeedItem[]>([]);
 
   // Publicaciones reales (promociones y eventos) de los establecimientos.
-  useEffect(() => {
-    let cancelado = false;
-    getFeedPublicaciones()
-      .then((list) => { if (!cancelado) setEstPosts(list); })
-      .catch(() => {});
-    return () => { cancelado = true; };
-  }, []);
+  const cargarFeed = () => { getFeedPublicaciones().then(setEstPosts).catch(() => {}); };
+  useEffect(() => { cargarFeed(); }, []);
 
   const feed = useMemo(() => (estPosts.length ? mezclarFeed(estPosts) : USER_POSTS), [estPosts]);
 
@@ -128,6 +129,15 @@ export default function HomeScreen() {
           <Image source={require('@/assets/images/logo-official.png')} style={styles.brandLogo} contentFit="contain" />
           <Text style={[styles.brandName, { color: theme.navy }]}>SportSpot</Text>
         </View>
+        {esDueno && (
+          <Pressable
+            onPress={() => setCompose(true)}
+            style={[styles.publishBtn, { backgroundColor: theme.primary }]}
+            accessibilityRole="button"
+            accessibilityLabel="Crear publicación">
+            <Text style={styles.publishBtnText}>＋ Publicar</Text>
+          </Pressable>
+        )}
       </View>
 
       {/* Botón de buscar -> establecimientos reales */}
@@ -165,6 +175,7 @@ export default function HomeScreen() {
       <PostModal post={post} onClose={() => setPost(null)} onVerPerfil={verPerfil} />
       <EstablishmentDetailModal id={detailId} onClose={() => setDetailId(null)} />
       <ExploreModal visible={explore} onClose={() => setExplore(false)} />
+      <ComposePostModal visible={compose} onClose={() => setCompose(false)} onPublished={cargarFeed} />
     </View>
   );
 }
@@ -178,6 +189,8 @@ const styles = StyleSheet.create({
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.one },
   brandLogo: { width: 34, height: 34 },
   brandName: { ...Typography.displayMd },
+  publishBtn: { paddingHorizontal: Spacing.three, paddingVertical: Spacing.one, borderRadius: BorderRadius.full },
+  publishBtnText: { ...Typography.bodyBold, color: '#fff' },
 
   searchBar: {
     flexDirection: 'row', alignItems: 'center', gap: Spacing.two,

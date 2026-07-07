@@ -91,6 +91,12 @@ export async function getEstablecimiento(id: string): Promise<EstablecimientoDet
   };
 }
 
+// GET /api/establecimientos/mios (Dueno) - para elegir dónde publicar desde el móvil.
+export async function getMisEstablecimientos(): Promise<{ id: string; nombre: string }[]> {
+  const rows = await apiFetch<any[]>('/api/establecimientos/mios');
+  return rows.map((e) => ({ id: e.id_establecimiento, nombre: e.nombre }));
+}
+
 // GET /api/establecimientos (publico). q = texto de busqueda opcional.
 export async function getEstablecimientos(q?: string): Promise<EstablecimientoResumen[]> {
   const query = q && q.trim() ? `?q=${encodeURIComponent(q.trim())}` : '';

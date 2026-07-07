@@ -29,6 +29,26 @@ const ETIQUETA: Record<string, string | undefined> = { evento: 'Evento', promoci
 // pseudo-conteos deterministas (no hay likes reales todavía)
 const hash = (s: string) => [...s].reduce((a, c) => a + c.charCodeAt(0), 0);
 
+// POST /api/publicaciones (Dueno) - crea una publicación desde el móvil.
+export async function crearPublicacion(input: {
+  id_establecimiento: string;
+  tipo: 'publicacion' | 'evento' | 'promocion';
+  titulo: string;
+  descripcion?: string;
+  imagen?: string | null;
+}): Promise<void> {
+  await apiFetch('/api/publicaciones', {
+    method: 'POST',
+    body: {
+      id_establecimiento: input.id_establecimiento,
+      tipo: input.tipo,
+      titulo: input.titulo,
+      descripcion: input.descripcion || undefined,
+      imagen: input.imagen || undefined,
+    },
+  });
+}
+
 export async function getFeedPublicaciones(): Promise<FeedItem[]> {
   const rows = await apiFetch<any[]>('/api/publicaciones', { auth: false });
   return rows.map((p) => {
