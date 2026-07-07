@@ -1,9 +1,6 @@
-// Feed estilo social. Mezcla:
-//  - Publicaciones de USUARIOS (mock, contenido casual de demostración).
-//  - Publicaciones de ESTABLECIMIENTOS generadas desde la BD real (llevan el id
-//    real para poder abrir su perfil desde el pop-up del post).
-import { sportColor } from './sports';
-import type { EstablecimientoResumen } from './establecimientos';
+// Contenido del feed. Los posts de ESTABLECIMIENTOS ahora vienen de la BD real
+// (ver src/data/publicaciones.ts). Aquí quedan solo las publicaciones de USUARIOS
+// (mock, contenido casual) y utilidades compartidas.
 
 export type FeedItem = {
   id: string;
@@ -11,23 +8,26 @@ export type FeedItem = {
   autor: string;
   autorInicial: string;
   autorColor: string;
+  autorLogo?: string | null;
   tiempo: string;
+  titulo?: string;
   texto: string;
   imagen: string;
   deporte?: string;
   deporteColor?: string;
+  etiqueta?: string; // 'Evento' | 'Promoción'
   esEvento?: boolean;
   fechaEvento?: string;
-  establecimientoId?: string; // real, para "Ver perfil"
+  establecimientoId?: string;
   likes: number;
   comentarios: number;
 };
 
-function initials(nombre: string): string {
+export function initials(nombre: string): string {
   return nombre.split(' ').filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? '').join('');
 }
 
-// Imagen de demostración según el deporte (aún no hay fotos reales en la BD).
+// Imagen de demostración según el deporte (fallback cuando una publicación no trae imagen).
 const SPORT_IMG: Record<string, string> = {
   futbol: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&q=80',
   basket: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&q=80',
@@ -35,7 +35,7 @@ const SPORT_IMG: Record<string, string> = {
   voley: 'https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?w=800&q=80',
   default: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=800&q=80',
 };
-function imagenDeporte(deporte?: string): string {
+export function imagenDeporte(deporte?: string): string {
   const n = (deporte || '').toLowerCase();
   if (n.includes('futbol') || n.includes('fútbol')) return SPORT_IMG.futbol;
   if (n.includes('basket')) return SPORT_IMG.basket;
@@ -84,36 +84,7 @@ export const USER_POSTS: FeedItem[] = [
   },
 ];
 
-// Frases de demostración para los posts de establecimientos.
-const PLANTILLAS = [
-  (n: string) => `¡Ya puedes reservar en ${n} directo desde SportSpot! 📲`,
-  (n: string) => `Nuevas horas disponibles esta semana en ${n}. ¡Aparta la tuya!`,
-  (n: string) => `Gracias por elegir ${n} 🙌 Te esperamos en la cancha.`,
-];
-
-// ─── Publicaciones de establecimientos (desde la BD real) ─────────────────────
-export function buildEstablecimientoPosts(ests: EstablecimientoResumen[]): FeedItem[] {
-  return ests.map((e, i) => {
-    const deporte = e.deportes[0];
-    return {
-      id: `e-${e.id_establecimiento}`,
-      tipoAutor: 'establecimiento',
-      autor: e.nombre,
-      autorInicial: initials(e.nombre),
-      autorColor: deporte ? sportColor(deporte) : '#1B2880',
-      tiempo: 'Reciente',
-      texto: PLANTILLAS[i % PLANTILLAS.length](e.nombre),
-      imagen: imagenDeporte(deporte),
-      deporte,
-      deporteColor: deporte ? sportColor(deporte) : undefined,
-      establecimientoId: e.id_establecimiento,
-      likes: 30 + ((i * 17) % 120),
-      comentarios: 3 + ((i * 5) % 20),
-    };
-  });
-}
-
-// Intercala usuarios y establecimientos para que el feed se vea variado.
+// Intercala publicaciones de establecimientos (reales) con las de usuarios (mock).
 export function mezclarFeed(estPosts: FeedItem[]): FeedItem[] {
   const out: FeedItem[] = [];
   const max = Math.max(USER_POSTS.length, estPosts.length);

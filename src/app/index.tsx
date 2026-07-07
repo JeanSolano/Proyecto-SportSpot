@@ -8,8 +8,9 @@ import EstablishmentDetailModal from '@/components/establishment-detail-modal';
 import ExploreModal from '@/components/explore-modal';
 import PostModal from '@/components/post-modal';
 import { BorderRadius, Shadows, Spacing, Typography } from '@/constants/theme';
-import { getEstablecimientos } from '@/data/establecimientos';
-import { buildEstablecimientoPosts, mezclarFeed, USER_POSTS, type FeedItem } from '@/data/mock-feed';
+import { mezclarFeed, USER_POSTS, type FeedItem } from '@/data/mock-feed';
+import { getFeedPublicaciones } from '@/data/publicaciones';
+import { sportLabel } from '@/data/sports';
 import { useTheme } from '@/hooks/use-theme';
 
 // ─── Tarjeta del feed ─────────────────────────────────────────────────────────
@@ -35,18 +36,22 @@ function FeedCard({
       accessibilityLabel={`Abrir publicación de ${item.autor}`}>
       {/* Autor */}
       <View style={styles.authorRow}>
-        <View style={[styles.avatar, { backgroundColor: item.autorColor }]}>
-          <Text style={styles.avatarText}>{item.autorInicial}</Text>
-        </View>
+        {item.autorLogo ? (
+          <Image source={{ uri: item.autorLogo }} style={styles.avatar} contentFit="cover" />
+        ) : (
+          <View style={[styles.avatar, { backgroundColor: item.autorColor }]}>
+            <Text style={styles.avatarText}>{item.autorInicial}</Text>
+          </View>
+        )}
         <View style={{ flex: 1 }}>
           <Text style={[styles.author, { color: theme.text }]} numberOfLines={1}>{item.autor}</Text>
           <Text style={[styles.time, { color: theme.textTertiary }]}>
             {esEstablecimiento ? 'Establecimiento' : 'Deportista'} · {item.tiempo}
           </Text>
         </View>
-        {item.esEvento && (
+        {item.etiqueta && (
           <View style={[styles.typeBadge, { backgroundColor: theme.backgroundSelected }]}>
-            <Text style={[styles.typeBadgeText, { color: theme.primary }]}>Evento</Text>
+            <Text style={[styles.typeBadgeText, { color: theme.primary }]}>{item.etiqueta}</Text>
           </View>
         )}
       </View>
@@ -56,7 +61,7 @@ function FeedCard({
         <Image source={{ uri: item.imagen }} style={styles.image} contentFit="cover" transition={250} />
         {item.deporte && (
           <View style={[styles.sportBadge, { backgroundColor: item.deporteColor || theme.primary }]}>
-            <Text style={styles.sportBadgeText}>{item.deporte}</Text>
+            <Text style={styles.sportBadgeText}>{sportLabel(item.deporte)}</Text>
           </View>
         )}
         {item.esEvento && item.fechaEvento && (
@@ -68,7 +73,10 @@ function FeedCard({
 
       {/* Contenido */}
       <View style={styles.content}>
-        <Text style={[styles.text, { color: theme.text }]} numberOfLines={2}>{item.texto}</Text>
+        {item.titulo ? <Text style={[styles.title, { color: theme.text }]} numberOfLines={2}>{item.titulo}</Text> : null}
+        {item.texto ? (
+          <Text style={[styles.text, { color: item.titulo ? theme.textSecondary : theme.text }]} numberOfLines={2}>{item.texto}</Text>
+        ) : null}
 
         <View style={styles.footer}>
           <Pressable onPress={onLike} hitSlop={8} style={styles.footerBtn} accessibilityRole="button" accessibilityLabel="Me gusta">
@@ -99,11 +107,11 @@ export default function HomeScreen() {
   const [detailId, setDetailId] = useState<string | null>(null);
   const [estPosts, setEstPosts] = useState<FeedItem[]>([]);
 
-  // Publicaciones de los establecimientos reales de la BD.
+  // Publicaciones reales (promociones y eventos) de los establecimientos.
   useEffect(() => {
     let cancelado = false;
-    getEstablecimientos()
-      .then((list) => { if (!cancelado) setEstPosts(buildEstablecimientoPosts(list)); })
+    getFeedPublicaciones()
+      .then((list) => { if (!cancelado) setEstPosts(list); })
       .catch(() => {});
     return () => { cancelado = true; };
   }, []);
@@ -200,6 +208,7 @@ const styles = StyleSheet.create({
   dateText: { ...Typography.bodyBold, color: '#fff' },
 
   content: { padding: Spacing.three, gap: Spacing.two },
+  title: { ...Typography.subheading },
   text: { ...Typography.body, lineHeight: 21 },
   footer: { flexDirection: 'row', alignItems: 'center', gap: Spacing.four, marginTop: Spacing.one },
   footerBtn: { flexDirection: 'row', alignItems: 'center', gap: 6 },

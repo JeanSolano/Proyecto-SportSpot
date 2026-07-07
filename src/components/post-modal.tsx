@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BorderRadius, Shadows, Spacing, Typography } from '@/constants/theme';
 import type { FeedItem } from '@/data/mock-feed';
+import { sportLabel } from '@/data/sports';
 import { useTheme } from '@/hooks/use-theme';
 
 export default function PostModal({
@@ -37,9 +38,13 @@ export default function PostModal({
             <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
               {/* Autor */}
               <View style={s.authorRow}>
-                <View style={[s.avatar, { backgroundColor: post.autorColor }]}>
-                  <Text style={s.avatarText}>{post.autorInicial}</Text>
-                </View>
+                {post.autorLogo ? (
+                  <Image source={{ uri: post.autorLogo }} style={s.avatar} contentFit="cover" />
+                ) : (
+                  <View style={[s.avatar, { backgroundColor: post.autorColor }]}>
+                    <Text style={s.avatarText}>{post.autorInicial}</Text>
+                  </View>
+                )}
                 <View style={{ flex: 1 }}>
                   <Text style={[s.author, { color: theme.text }]} numberOfLines={1}>{post.autor}</Text>
                   <Text style={[s.time, { color: theme.textTertiary }]}>
@@ -53,7 +58,7 @@ export default function PostModal({
                 <Image source={{ uri: post.imagen }} style={s.image} contentFit="cover" transition={200} />
                 {post.deporte && (
                   <View style={[s.sportBadge, { backgroundColor: post.deporteColor || theme.primary }]}>
-                    <Text style={s.sportBadgeText}>{post.deporte}</Text>
+                    <Text style={s.sportBadgeText}>{sportLabel(post.deporte)}</Text>
                   </View>
                 )}
               </View>
@@ -65,7 +70,8 @@ export default function PostModal({
                     <Text style={[s.eventChipText, { color: theme.primary }]}>📅 {post.fechaEvento}</Text>
                   </View>
                 )}
-                <Text style={[s.text, { color: theme.text }]}>{post.texto}</Text>
+                {post.titulo ? <Text style={[s.postTitle, { color: theme.text }]}>{post.titulo}</Text> : null}
+                {post.texto ? <Text style={[s.text, { color: theme.textSecondary }]}>{post.texto}</Text> : null}
 
                 <View style={s.stats}>
                   <Text style={[s.statText, { color: theme.textSecondary }]}>♥ {post.likes}</Text>
@@ -120,6 +126,7 @@ const s = StyleSheet.create({
   body: { paddingVertical: Spacing.three, gap: Spacing.two },
   eventChip: { alignSelf: 'flex-start', paddingHorizontal: Spacing.two, paddingVertical: 5, borderRadius: BorderRadius.full },
   eventChipText: { ...Typography.badge },
+  postTitle: { ...Typography.heading },
   text: { ...Typography.body, lineHeight: 22 },
   stats: { flexDirection: 'row', gap: Spacing.four, marginTop: Spacing.one },
   statText: { ...Typography.body },
