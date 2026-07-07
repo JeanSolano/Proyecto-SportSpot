@@ -23,6 +23,7 @@ DROP TABLE IF EXISTS cancha_imagenes CASCADE;
 DROP TABLE IF EXISTS cancha_horarios CASCADE;
 DROP TABLE IF EXISTS canchas CASCADE;
 DROP TABLE IF EXISTS horarios_operacion CASCADE;
+DROP TABLE IF EXISTS publicaciones CASCADE;
 DROP TABLE IF EXISTS establecimiento_imagenes CASCADE;
 DROP TABLE IF EXISTS establecimiento_amenidades CASCADE;
 DROP TABLE IF EXISTS establecimientos CASCADE;
@@ -146,6 +147,20 @@ CREATE TABLE establecimiento_imagenes (
   created_at          TIMESTAMP NOT NULL DEFAULT NOW()
 );
 CREATE INDEX idx_estab_imagenes ON establecimiento_imagenes (id_establecimiento);
+
+-- Publicaciones del establecimiento (feed): publicacion | evento | promocion
+CREATE TABLE publicaciones (
+  id_publicacion      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id_establecimiento  UUID NOT NULL REFERENCES establecimientos(id_establecimiento) ON DELETE CASCADE,
+  tipo                VARCHAR(20) NOT NULL DEFAULT 'publicacion',  -- publicacion | evento | promocion
+  titulo              VARCHAR(150) NOT NULL,
+  descripcion         TEXT,
+  imagen              TEXT,                 -- data URL (base64) o URL, opcional
+  fecha_evento        TIMESTAMP,            -- solo para eventos
+  activo              BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at          TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE INDEX idx_publicaciones_estab ON publicaciones (id_establecimiento);
 
 -- Horario de operacion del establecimiento (apertura/cierre por dia)
 CREATE TABLE horarios_operacion (

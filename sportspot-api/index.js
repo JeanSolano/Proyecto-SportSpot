@@ -23,6 +23,7 @@ app.use('/api/canchas', require('./routes/canchas'));
 app.use('/api/reservas', require('./routes/reservas'));
 app.use('/api/suscripciones', require('./routes/suscripciones'));
 app.use('/api/pagos', require('./routes/pagos'));
+app.use('/api/publicaciones', require('./routes/publicaciones'));
 
 // 404
 app.use((req, res) => res.status(404).json({ error: 'Ruta no encontrada' }));
