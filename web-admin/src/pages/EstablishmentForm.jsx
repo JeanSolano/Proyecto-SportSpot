@@ -6,6 +6,7 @@ import { addEstablishment, getEstablishment, getEstablishments, getSubscription,
 import { planById } from '../data/plans';
 import { AMENITIES } from '../data/constants';
 import CourtScheduleEditor from '../components/CourtScheduleEditor.jsx';
+import AppPreview from '../components/AppPreview.jsx';
 
 const newCourt = () => ({
   id: Math.random().toString(36).slice(2, 8),
@@ -169,7 +170,8 @@ export default function EstablishmentForm() {
 
         {error && <div className="banner-error"><AlertCircle className="lucide" /> {error}</div>}
 
-        <form onSubmit={submit}>
+        <div className="form-with-preview">
+          <form onSubmit={submit} className="form-main">
           {/* ---------------------------------------------- Datos generales */}
           <div className="card card-pad form-section">
             <div className="form-section-title"><ClipboardList className="lucide" /> 1 · Datos del establecimiento</div>
@@ -269,7 +271,12 @@ export default function EstablishmentForm() {
               {saving ? <span className="spinner" /> : isEdit ? 'Guardar cambios' : '🚀 Publicar establecimiento'}
             </button>
           </div>
-        </form>
+          </form>
+
+          <aside className="preview-pane">
+            <AppPreview name={name} direccion={direccion} description={description} courts={courts} amenities={amenities} />
+          </aside>
+        </div>
       </div>
     </>
   );
